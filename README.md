@@ -25,6 +25,7 @@ py -3.12 -m venv .venv
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 python -m pip install --editable ".[dev]"
+python -m alembic upgrade head
 ```
 
 ## Run the API
@@ -35,11 +36,25 @@ python -m uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000/docs` for the interactive API documentation.
 
+## Database migrations
+
+Apply all pending migrations:
+
+```powershell
+python -m alembic upgrade head
+```
+
+Roll back the latest migration:
+
+```powershell
+python -m alembic downgrade -1
+```
+
 ## Quality checks
 
 ```powershell
-python -m ruff check app tests
-python -m ruff format --check app tests
+python -m ruff check app tests migrations
+python -m ruff format --check app tests migrations
 python -m pytest --cov=app --cov-report=term-missing
 ```
 

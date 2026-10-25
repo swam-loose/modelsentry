@@ -37,8 +37,13 @@ def db_session(tmp_path: Path) -> Iterator[Session]:
 @pytest.fixture
 def client(tmp_path: Path) -> Iterator[TestClient]:
     database_path = (tmp_path / "api.db").as_posix()
+    database_url = f"sqlite+pysqlite:///{database_path}"
+    engine = create_db_engine(database_url)
+    Base.metadata.create_all(engine)
     application = create_app(
-        database_url=f"sqlite+pysqlite:///{database_path}",
+        database_url=database_url,
     )
     with TestClient(application) as test_client:
         yield test_client
+    Base.metadata.drop_all(engine)
+    engine.dispose()
