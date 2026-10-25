@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from app.api.routes.health import router as health_router
 from app.api.routes.models import router as models_router
 from app.core.config import get_settings
-from app.db.base import Base
 from app.db.session import create_db_engine, create_session_factory
 
 
@@ -19,7 +18,6 @@ def create_app(*, database_url: str | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        Base.metadata.create_all(bind=engine)
         yield
         engine.dispose()
 
