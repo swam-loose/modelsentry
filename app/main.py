@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from app.api.routes.health import router as health_router
 from app.api.routes.models import router as models_router
+from app.api.routes.prompts import router as prompts_router
 from app.core.config import get_settings
 from app.db.session import create_db_engine, create_session_factory
 
@@ -30,6 +31,7 @@ def create_app(*, database_url: str | None = None) -> FastAPI:
     application.state.session_factory = session_factory
     application.include_router(health_router, prefix=settings.api_prefix)
     application.include_router(models_router, prefix=settings.api_prefix)
+    application.include_router(prompts_router, prefix=settings.api_prefix)
     return application
 
 
