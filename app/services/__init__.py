@@ -1,3 +1,10 @@
+from app.services.evaluation_dataset import (
+    DatasetContentTooLargeError,
+    DatasetRegistryConflictError,
+    DatasetRegistryNotFoundError,
+    DatasetRegistryService,
+    DatasetValidationError,
+)
 from app.services.model_registry import (
     ModelRegistryConflictError,
     ModelRegistryNotFoundError,
@@ -10,6 +17,11 @@ from app.services.prompt_registry import (
 )
 
 __all__ = [
+    "DatasetContentTooLargeError",
+    "DatasetRegistryConflictError",
+    "DatasetRegistryNotFoundError",
+    "DatasetRegistryService",
+    "DatasetValidationError",
     "ModelRegistryConflictError",
     "ModelRegistryNotFoundError",
     "ModelRegistryService",
