@@ -1,3 +1,13 @@
+from app.schemas.evaluation_dataset import (
+    EvaluationCaseCreate,
+    EvaluationCaseRead,
+    EvaluationDatasetCreate,
+    EvaluationDatasetDetailRead,
+    EvaluationDatasetRead,
+    EvaluationDatasetVersionCreate,
+    EvaluationDatasetVersionDetailRead,
+    EvaluationDatasetVersionRead,
+)
 from app.schemas.model import (
     ModelProvider,
     RegisteredModelCreate,
@@ -12,6 +22,14 @@ from app.schemas.prompt import (
 )
 
 __all__ = [
+    "EvaluationCaseCreate",
+    "EvaluationCaseRead",
+    "EvaluationDatasetCreate",
+    "EvaluationDatasetDetailRead",
+    "EvaluationDatasetRead",
+    "EvaluationDatasetVersionCreate",
+    "EvaluationDatasetVersionDetailRead",
+    "EvaluationDatasetVersionRead",
     "ModelProvider",
     "PromptCreate",
     "PromptDetailRead",

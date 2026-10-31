@@ -23,12 +23,29 @@ def test_migrations_upgrade_and_downgrade(
 
     engine = create_engine(database_url)
     table_names = set(inspect(engine).get_table_names())
-    assert {"prompt_versions", "prompts", "registered_models"} <= table_names
+    assert {
+        "evaluation_cases",
+        "evaluation_dataset_versions",
+        "evaluation_datasets",
+        "prompt_versions",
+        "prompts",
+        "registered_models",
+    } <= table_names
     engine.dispose()
 
     command.downgrade(config, "base")
 
     engine = create_engine(database_url)
     table_names = set(inspect(engine).get_table_names())
-    assert not {"prompt_versions", "prompts", "registered_models"} & table_names
+    assert (
+        not {
+            "evaluation_cases",
+            "evaluation_dataset_versions",
+            "evaluation_datasets",
+            "prompt_versions",
+            "prompts",
+            "registered_models",
+        }
+        & table_names
+    )
     engine.dispose()

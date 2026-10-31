@@ -12,6 +12,9 @@ Version 0.1 starts as a Windows-native FastAPI application with SQLite and a
 mock model provider. It does not require Docker, WSL, Redis, PostgreSQL, or a
 paid AI API.
 
+The current API includes model registration, immutable prompt versions, and
+versioned evaluation datasets with deterministic JSONL content hashes.
+
 ## Requirements
 
 - Python 3.12
@@ -49,6 +52,19 @@ Roll back the latest migration:
 ```powershell
 python -m alembic downgrade -1
 ```
+
+## Evaluation dataset JSONL
+
+Each non-empty line must contain one JSON object with a unique `case_key`, an
+`input` object, and optional `expected_output` and `metadata` values:
+
+```json
+{"case_key":"capital-france","input":{"question":"What is the capital of France?"},"expected_output":{"contains":"Paris"},"metadata":{"category":"geography"}}
+```
+
+Import JSONL through `POST /api/v1/datasets/{dataset_id}/versions/jsonl` using
+the `application/x-ndjson` content type. Equivalent validated content produces
+the same SHA-256 hash and cannot be registered twice for the same dataset.
 
 ## Quality checks
 
