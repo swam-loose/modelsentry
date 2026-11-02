@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.evaluation_run import EvaluationResult
+from app.models.evaluation_run import EvaluationCheck, EvaluationResult
 from app.repositories.evaluation_dataset import EvaluationDatasetRepository
 from app.repositories.evaluation_run import EvaluationRunRepository
 from app.repositories.model_registry import ModelRegistryRepository
@@ -73,9 +73,20 @@ def test_repository_persists_run_transitions_and_results(
                 evaluation_case_id=dataset_version.cases[0].id,
                 position=0,
                 status="succeeded",
+                evaluation_status="passed",
                 rendered_user_prompt="Question: What is the capital of France?",
                 output_text="Paris",
                 latency_ms=10,
+                checks=[
+                    EvaluationCheck(
+                        position=0,
+                        evaluator_type="contains",
+                        passed=True,
+                        expected_value="Paris",
+                        actual_value="Paris",
+                        message="Output contained the required text.",
+                    )
+                ],
             )
         ],
     )
@@ -84,5 +95,9 @@ def test_repository_persists_run_transitions_and_results(
     assert run.started_at is not None
     assert run.completed_at is not None
     assert run.succeeded_cases == 1
+    assert run.passed_cases == 1
+    assert run.failed_cases == 0
+    assert run.pass_rate == 1.0
+    assert run.results[0].checks[0].evaluator_type == "contains"
     assert repository.get_by_id(run.id) is run
     assert repository.list_all() == [run]

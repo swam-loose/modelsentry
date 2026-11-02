@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    JSON,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -48,6 +50,18 @@ class EvaluationRun(Base):
         CheckConstraint(
             "errored_cases >= 0",
             name="ck_evaluation_runs_nonnegative_errored_cases",
+        ),
+        CheckConstraint(
+            "passed_cases >= 0",
+            name="ck_evaluation_runs_nonnegative_passed_cases",
+        ),
+        CheckConstraint(
+            "failed_cases >= 0",
+            name="ck_evaluation_runs_nonnegative_failed_cases",
+        ),
+        CheckConstraint(
+            "passed_cases + failed_cases <= succeeded_cases",
+            name="ck_evaluation_runs_evaluated_within_succeeded",
         ),
     )
 
@@ -100,6 +114,18 @@ class EvaluationRun(Base):
         default=0,
         server_default="0",
     )
+    passed_cases: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    failed_cases: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -124,6 +150,20 @@ class EvaluationRun(Base):
         order_by="EvaluationResult.position",
     )
 
+    @property
+    def evaluated_cases(self) -> int:
+        """Number of successful provider results with deterministic expectations."""
+
+        return self.passed_cases + self.failed_cases
+
+    @property
+    def pass_rate(self) -> float | None:
+        """Share of evaluated cases that passed every configured policy."""
+
+        if self.evaluated_cases == 0:
+            return None
+        return self.passed_cases / self.evaluated_cases
+
 
 class EvaluationResult(Base):
     """One provider response or rendering error for an evaluation case."""
@@ -133,6 +173,10 @@ class EvaluationResult(Base):
         CheckConstraint(
             "status IN ('succeeded', 'error')",
             name="ck_evaluation_results_status",
+        ),
+        CheckConstraint(
+            "evaluation_status IN ('not_evaluated', 'passed', 'failed')",
+            name="ck_evaluation_results_evaluation_status",
         ),
         CheckConstraint(
             "position >= 0",
@@ -173,6 +217,12 @@ class EvaluationResult(Base):
     )
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False)
+    evaluation_status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="not_evaluated",
+        server_default="not_evaluated",
+    )
     rendered_system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
     rendered_user_prompt: Mapped[str] = mapped_column(Text, nullable=False)
     output_text: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -186,3 +236,50 @@ class EvaluationResult(Base):
     )
     run: Mapped[EvaluationRun] = relationship(back_populates="results")
     evaluation_case: Mapped[EvaluationCase] = relationship()
+    checks: Mapped[list[EvaluationCheck]] = relationship(
+        back_populates="evaluation_result",
+        cascade="all, delete-orphan",
+        order_by="EvaluationCheck.position",
+    )
+
+
+class EvaluationCheck(Base):
+    """Persisted evidence from one deterministic evaluator."""
+
+    __tablename__ = "evaluation_checks"
+    __table_args__ = (
+        CheckConstraint(
+            "position >= 0",
+            name="ck_evaluation_checks_nonnegative_position",
+        ),
+        UniqueConstraint(
+            "evaluation_result_id",
+            "position",
+            name="uq_evaluation_checks_result_position",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+    )
+    evaluation_result_id: Mapped[UUID] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("evaluation_results.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    evaluator_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    expected_value: Mapped[object] = mapped_column(JSON, nullable=False)
+    actual_value: Mapped[object] = mapped_column(JSON, nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        server_default=func.now(),
+    )
+    evaluation_result: Mapped[EvaluationResult] = relationship(back_populates="checks")

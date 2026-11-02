@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, JsonValue
 
 EvaluationRunStatus = Literal["pending", "running", "completed", "failed"]
 EvaluationResultStatus = Literal["succeeded", "error"]
+DeterministicEvaluationStatus = Literal["not_evaluated", "passed", "failed"]
 
 
 class EvaluationRunCreate(BaseModel):
@@ -18,6 +21,22 @@ class EvaluationRunCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class EvaluationCheckRead(BaseModel):
+    """Evidence emitted by one deterministic evaluator."""
+
+    id: UUID
+    evaluation_result_id: UUID
+    position: int
+    evaluator_type: str
+    passed: bool
+    expected_value: JsonValue
+    actual_value: JsonValue
+    message: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class EvaluationResultRead(BaseModel):
     """Public representation of one case-level provider result."""
 
@@ -26,12 +45,14 @@ class EvaluationResultRead(BaseModel):
     evaluation_case_id: UUID
     position: int
     status: EvaluationResultStatus
+    evaluation_status: DeterministicEvaluationStatus
     rendered_system_prompt: str | None
     rendered_user_prompt: str
     output_text: str | None
     error_message: str | None
     latency_ms: int
     created_at: datetime
+    checks: list[EvaluationCheckRead]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -49,6 +70,10 @@ class EvaluationRunRead(BaseModel):
     total_cases: int
     succeeded_cases: int
     errored_cases: int
+    passed_cases: int
+    failed_cases: int
+    evaluated_cases: int
+    pass_rate: float | None
     error_message: str | None
     created_at: datetime
     started_at: datetime | None

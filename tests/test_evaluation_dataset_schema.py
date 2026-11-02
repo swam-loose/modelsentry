@@ -69,3 +69,19 @@ def test_dataset_version_rejects_duplicate_case_keys() -> None:
         EvaluationDatasetVersionCreate(
             cases=[make_case(), make_case()],
         )
+
+
+def test_evaluation_case_rejects_invalid_evaluator_policy() -> None:
+    with pytest.raises(ValidationError):
+        EvaluationCaseCreate(
+            case_key="capital-france",
+            input={"question": "What is the capital of France?"},
+            expected_output={
+                "evaluators": [
+                    {
+                        "type": "json_schema",
+                        "schema": {"type": "invalid-type"},
+                    }
+                ]
+            },
+        )

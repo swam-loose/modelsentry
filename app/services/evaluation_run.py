@@ -2,8 +2,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.evaluation.evaluators import DeterministicEvaluatorEngine
 from app.evaluation.renderer import PromptRenderer, PromptRenderingError
-from app.models.evaluation_run import EvaluationResult, EvaluationRun
+from app.models.evaluation_run import EvaluationCheck, EvaluationResult, EvaluationRun
 from app.providers.mock import MockModelProvider
 from app.repositories.evaluation_run import EvaluationRunRepository
 from app.schemas.evaluation_run import EvaluationRunCreate
@@ -83,17 +84,32 @@ class EvaluationRunService:
                         rendered_user_prompt=rendered_user_prompt,
                         case_input=case.input_data,
                     )
-                    results.append(
-                        EvaluationResult(
-                            evaluation_case_id=case.id,
-                            position=case.position,
-                            status="succeeded",
-                            rendered_system_prompt=rendered_system_prompt,
-                            rendered_user_prompt=rendered_user_prompt,
-                            output_text=response.output_text,
-                            latency_ms=response.latency_ms,
-                        )
+                    report = DeterministicEvaluatorEngine.evaluate(
+                        response.output_text,
+                        case.expected_output,
                     )
+                    result = EvaluationResult(
+                        evaluation_case_id=case.id,
+                        position=case.position,
+                        status="succeeded",
+                        evaluation_status=report.status,
+                        rendered_system_prompt=rendered_system_prompt,
+                        rendered_user_prompt=rendered_user_prompt,
+                        output_text=response.output_text,
+                        latency_ms=response.latency_ms,
+                    )
+                    result.checks.extend(
+                        EvaluationCheck(
+                            position=position,
+                            evaluator_type=outcome.evaluator_type,
+                            passed=outcome.passed,
+                            expected_value=outcome.expected_value,
+                            actual_value=outcome.actual_value,
+                            message=outcome.message,
+                        )
+                        for position, outcome in enumerate(report.outcomes)
+                    )
+                    results.append(result)
                 except PromptRenderingError as error:
                     results.append(
                         EvaluationResult(

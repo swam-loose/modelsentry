@@ -68,6 +68,12 @@ class EvaluationRunRepository:
         run.results.extend(results)
         run.succeeded_cases = sum(result.status == "succeeded" for result in results)
         run.errored_cases = sum(result.status == "error" for result in results)
+        run.passed_cases = sum(
+            result.evaluation_status == "passed" for result in results
+        )
+        run.failed_cases = sum(
+            result.evaluation_status == "failed" for result in results
+        )
         run.status = "completed"
         run.completed_at = datetime.now(UTC)
         self.session.commit()
@@ -86,7 +92,11 @@ class EvaluationRunRepository:
         statement = (
             select(EvaluationRun)
             .where(EvaluationRun.id == run_id)
-            .options(selectinload(EvaluationRun.results))
+            .options(
+                selectinload(EvaluationRun.results).selectinload(
+                    EvaluationResult.checks
+                )
+            )
         )
         return self.session.scalar(statement)
 
