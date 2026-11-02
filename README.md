@@ -78,6 +78,28 @@ The mock provider requires no credentials, external service, or paid API. A
 case can define `input.mock_response` to control its exact synthetic output.
 Run details and evidence are available through `GET /api/v1/runs/{run_id}`.
 
+## Deterministic evaluators
+
+Each evaluation case can define an `expected_output` policy. ModelSentry
+supports exact text matching, substring checks, structural JSON equality,
+Draft 2020-12 JSON Schema validation, required terms, and forbidden terms.
+Checks are deterministic, persisted individually, and combined with either
+`all` or `any` semantics.
+
+```json
+{
+  "mode": "all",
+  "evaluators": [
+    {"type": "contains", "value": "Paris", "case_sensitive": false},
+    {"type": "forbidden_terms", "terms": ["uncertain", "London"]}
+  ]
+}
+```
+
+For compatibility, concise forms such as `{"contains":"Paris"}` remain
+valid. Run responses expose every evaluator decision, its expected and actual
+evidence, case-level status, aggregate passed and failed counts, and pass rate.
+
 ## Quality checks
 
 ```powershell
@@ -90,7 +112,7 @@ python -m pytest --cov=app --cov-report=term-missing
 
 1. Model and prompt registry
 2. Versioned JSONL evaluation datasets
-3. Deterministic schema and policy evaluators
-4. Human review and approval workflow
-5. A/B comparison, latency, and cost metrics
-6. Evidence-backed release quality gates
+3. Human review and approval workflow
+4. A/B comparison, latency, and cost metrics
+5. Evidence-backed release quality gates
+

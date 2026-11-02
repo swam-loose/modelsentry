@@ -93,11 +93,16 @@ def test_service_executes_deterministic_mock_run(db_session: Session) -> None:
     assert run.total_cases == 2
     assert run.succeeded_cases == 2
     assert run.errored_cases == 0
+    assert run.passed_cases == 2
+    assert run.failed_cases == 0
+    assert run.pass_rate == 1.0
     assert [result.output_text for result in run.results] == [
         "Paris is the capital of France.",
         "Brasilia is the capital of Brazil.",
     ]
     assert all(5 <= result.latency_ms <= 50 for result in run.results)
+    assert all(result.evaluation_status == "passed" for result in run.results)
+    assert all(result.checks[0].evaluator_type == "contains" for result in run.results)
 
 
 def test_service_records_case_level_rendering_errors(db_session: Session) -> None:
@@ -111,6 +116,8 @@ def test_service_records_case_level_rendering_errors(db_session: Session) -> Non
     assert run.status == "completed"
     assert run.succeeded_cases == 0
     assert run.errored_cases == 2
+    assert run.passed_cases == 0
+    assert run.failed_cases == 0
     assert all(result.status == "error" for result in run.results)
     assert all(
         "Missing prompt variables" in (result.error_message or "")
@@ -134,3 +141,27 @@ def test_service_reports_missing_model(db_session: Session) -> None:
 
     with pytest.raises(EvaluationRunNotFoundError):
         EvaluationRunService(db_session).create_and_execute(payload)
+
+
+def test_service_persists_failed_policy_evidence(db_session: Session) -> None:
+    payload = create_dependencies(db_session)
+    dataset_version = EvaluationRunService(db_session).repository.get_dataset_version(
+        payload.dataset_version_id
+    )
+    assert dataset_version is not None
+    dataset_version.cases[0].expected_output = {
+        "required_terms": ["Paris", "France"],
+        "forbidden_terms": ["capital"],
+    }
+    db_session.commit()
+
+    run = EvaluationRunService(db_session).create_and_execute(payload)
+
+    assert run.status == "completed"
+    assert run.passed_cases == 1
+    assert run.failed_cases == 1
+    assert run.pass_rate == 0.5
+    first_result = run.results[0]
+    assert first_result.evaluation_status == "failed"
+    assert [check.passed for check in first_result.checks] == [True, False]
+    assert "capital" in first_result.checks[1].message

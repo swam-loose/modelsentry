@@ -12,6 +12,8 @@ from pydantic import (
     field_validator,
 )
 
+from app.schemas.evaluator import normalize_evaluation_policy
+
 DatasetName = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=120),
@@ -53,6 +55,15 @@ class EvaluationCaseCreate(BaseModel):
     metadata: dict[str, JsonValue] = Field(default_factory=dict)
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("expected_output")
+    @classmethod
+    def expected_output_must_define_valid_evaluators(
+        cls,
+        expected_output: JsonValue | None,
+    ) -> JsonValue | None:
+        normalize_evaluation_policy(expected_output)
+        return expected_output
 
 
 class EvaluationDatasetVersionCreate(BaseModel):

@@ -77,8 +77,15 @@ def test_create_list_and_get_mock_evaluation_run(client: TestClient) -> None:
     assert created["total_cases"] == 2
     assert created["succeeded_cases"] == 2
     assert created["errored_cases"] == 0
+    assert created["passed_cases"] == 2
+    assert created["failed_cases"] == 0
+    assert created["evaluated_cases"] == 2
+    assert created["pass_rate"] == 1.0
     assert [result["position"] for result in created["results"]] == [0, 1]
     assert created["results"][0]["output_text"] == ("Paris is the capital of France.")
+    assert created["results"][0]["evaluation_status"] == "passed"
+    assert created["results"][0]["checks"][0]["evaluator_type"] == "contains"
+    assert created["results"][0]["checks"][0]["passed"] is True
 
     list_response = client.get("/api/v1/runs")
     get_response = client.get(f"/api/v1/runs/{created['id']}")

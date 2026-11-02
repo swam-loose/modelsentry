@@ -25,6 +25,7 @@ def test_migrations_upgrade_and_downgrade(
     table_names = set(inspect(engine).get_table_names())
     assert {
         "evaluation_cases",
+        "evaluation_checks",
         "evaluation_dataset_versions",
         "evaluation_datasets",
         "evaluation_results",
@@ -42,6 +43,7 @@ def test_migrations_upgrade_and_downgrade(
     assert (
         not {
             "evaluation_cases",
+            "evaluation_checks",
             "evaluation_dataset_versions",
             "evaluation_datasets",
             "evaluation_results",

@@ -9,10 +9,20 @@ from app.schemas.evaluation_dataset import (
     EvaluationDatasetVersionRead,
 )
 from app.schemas.evaluation_run import (
+    EvaluationCheckRead,
     EvaluationResultRead,
     EvaluationRunCreate,
     EvaluationRunDetailRead,
     EvaluationRunRead,
+)
+from app.schemas.evaluator import (
+    ContainsEvaluator,
+    EvaluationPolicy,
+    ExactMatchEvaluator,
+    ForbiddenTermsEvaluator,
+    JsonEqualsEvaluator,
+    JsonSchemaEvaluator,
+    RequiredTermsEvaluator,
 )
 from app.schemas.model import (
     ModelProvider,
@@ -30,6 +40,7 @@ from app.schemas.prompt import (
 __all__ = [
     "EvaluationCaseCreate",
     "EvaluationCaseRead",
+    "EvaluationCheckRead",
     "EvaluationDatasetCreate",
     "EvaluationDatasetDetailRead",
     "EvaluationDatasetRead",
@@ -40,6 +51,12 @@ __all__ = [
     "EvaluationRunCreate",
     "EvaluationRunDetailRead",
     "EvaluationRunRead",
+    "ContainsEvaluator",
+    "EvaluationPolicy",
+    "ExactMatchEvaluator",
+    "ForbiddenTermsEvaluator",
+    "JsonEqualsEvaluator",
+    "JsonSchemaEvaluator",
     "ModelProvider",
     "PromptCreate",
     "PromptDetailRead",
@@ -48,4 +65,5 @@ __all__ = [
     "PromptVersionRead",
     "RegisteredModelCreate",
     "RegisteredModelRead",
+    "RequiredTermsEvaluator",
 ]
