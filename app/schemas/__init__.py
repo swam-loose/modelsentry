@@ -8,6 +8,12 @@ from app.schemas.evaluation_dataset import (
     EvaluationDatasetVersionDetailRead,
     EvaluationDatasetVersionRead,
 )
+from app.schemas.evaluation_run import (
+    EvaluationResultRead,
+    EvaluationRunCreate,
+    EvaluationRunDetailRead,
+    EvaluationRunRead,
+)
 from app.schemas.model import (
     ModelProvider,
     RegisteredModelCreate,
@@ -30,6 +36,10 @@ __all__ = [
     "EvaluationDatasetVersionCreate",
     "EvaluationDatasetVersionDetailRead",
     "EvaluationDatasetVersionRead",
+    "EvaluationResultRead",
+    "EvaluationRunCreate",
+    "EvaluationRunDetailRead",
+    "EvaluationRunRead",
     "ModelProvider",
     "PromptCreate",
     "PromptDetailRead",

@@ -12,8 +12,9 @@ Version 0.1 starts as a Windows-native FastAPI application with SQLite and a
 mock model provider. It does not require Docker, WSL, Redis, PostgreSQL, or a
 paid AI API.
 
-The current API includes model registration, immutable prompt versions, and
-versioned evaluation datasets with deterministic JSONL content hashes.
+The current API includes model registration, immutable prompt versions,
+versioned evaluation datasets with deterministic JSONL content hashes, and
+reproducible evaluation runs powered by a local mock provider.
 
 ## Requirements
 
@@ -66,6 +67,17 @@ Import JSONL through `POST /api/v1/datasets/{dataset_id}/versions/jsonl` using
 the `application/x-ndjson` content type. Equivalent validated content produces
 the same SHA-256 hash and cannot be registered twice for the same dataset.
 
+## Deterministic mock evaluation runs
+
+Create a run through `POST /api/v1/runs` using the IDs of a registered model,
+an immutable prompt version, and an evaluation dataset version. The first
+provider is `mock`: it renders every case locally, records case-level outputs
+and errors, and produces deterministic latency values for reproducible tests.
+
+The mock provider requires no credentials, external service, or paid API. A
+case can define `input.mock_response` to control its exact synthetic output.
+Run details and evidence are available through `GET /api/v1/runs/{run_id}`.
+
 ## Quality checks
 
 ```powershell
@@ -78,8 +90,7 @@ python -m pytest --cov=app --cov-report=term-missing
 
 1. Model and prompt registry
 2. Versioned JSONL evaluation datasets
-3. Mock-provider evaluation runs
-4. Deterministic schema and policy evaluators
-5. Human review and approval workflow
-6. A/B comparison, latency, and cost metrics
-7. Evidence-backed release quality gates
+3. Deterministic schema and policy evaluators
+4. Human review and approval workflow
+5. A/B comparison, latency, and cost metrics
+6. Evidence-backed release quality gates
