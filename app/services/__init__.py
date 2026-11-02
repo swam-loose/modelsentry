@@ -5,6 +5,11 @@ from app.services.evaluation_dataset import (
     DatasetRegistryService,
     DatasetValidationError,
 )
+from app.services.evaluation_run import (
+    EvaluationRunNotFoundError,
+    EvaluationRunService,
+    EvaluationRunUnsupportedProviderError,
+)
 from app.services.model_registry import (
     ModelRegistryConflictError,
     ModelRegistryNotFoundError,
@@ -22,6 +27,9 @@ __all__ = [
     "DatasetRegistryNotFoundError",
     "DatasetRegistryService",
     "DatasetValidationError",
+    "EvaluationRunNotFoundError",
+    "EvaluationRunService",
+    "EvaluationRunUnsupportedProviderError",
     "ModelRegistryConflictError",
     "ModelRegistryNotFoundError",
     "ModelRegistryService",
