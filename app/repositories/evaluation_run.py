@@ -95,7 +95,8 @@ class EvaluationRunRepository:
             .options(
                 selectinload(EvaluationRun.results).selectinload(
                     EvaluationResult.checks
-                )
+                ),
+                selectinload(EvaluationRun.reviews),
             )
         )
         return self.session.scalar(statement)
@@ -108,6 +109,7 @@ class EvaluationRunRepository:
     ) -> list[EvaluationRun]:
         statement = (
             select(EvaluationRun)
+            .options(selectinload(EvaluationRun.reviews))
             .order_by(EvaluationRun.created_at, EvaluationRun.id)
             .offset(offset)
             .limit(limit)

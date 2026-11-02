@@ -10,6 +10,11 @@ from app.services.evaluation_run import (
     EvaluationRunService,
     EvaluationRunUnsupportedProviderError,
 )
+from app.services.human_review import (
+    HumanReviewConflictError,
+    HumanReviewNotFoundError,
+    HumanReviewService,
+)
 from app.services.model_registry import (
     ModelRegistryConflictError,
     ModelRegistryNotFoundError,
@@ -30,6 +35,9 @@ __all__ = [
     "EvaluationRunNotFoundError",
     "EvaluationRunService",
     "EvaluationRunUnsupportedProviderError",
+    "HumanReviewConflictError",
+    "HumanReviewNotFoundError",
+    "HumanReviewService",
     "ModelRegistryConflictError",
     "ModelRegistryNotFoundError",
     "ModelRegistryService",
