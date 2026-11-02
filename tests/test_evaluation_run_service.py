@@ -103,6 +103,12 @@ def test_service_executes_deterministic_mock_run(db_session: Session) -> None:
     assert all(5 <= result.latency_ms <= 50 for result in run.results)
     assert all(result.evaluation_status == "passed" for result in run.results)
     assert all(result.checks[0].evaluator_type == "contains" for result in run.results)
+    assert run.input_tokens > 0
+    assert run.output_tokens > 0
+    assert run.total_tokens == run.input_tokens + run.output_tokens
+    assert run.total_latency_ms == sum(result.latency_ms for result in run.results)
+    assert run.average_latency_ms > 0
+    assert run.p95_latency_ms > 0
 
 
 def test_service_records_case_level_rendering_errors(db_session: Session) -> None:

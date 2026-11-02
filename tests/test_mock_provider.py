@@ -15,6 +15,8 @@ def test_mock_provider_is_deterministic() -> None:
     assert first == second
     assert first.output_text == "[deterministic-v1] Question: Where is Paris?"
     assert 5 <= first.latency_ms <= 50
+    assert first.input_tokens > 0
+    assert first.output_tokens > 0
 
 
 def test_mock_provider_supports_explicit_synthetic_response() -> None:
@@ -28,3 +30,5 @@ def test_mock_provider_supports_explicit_synthetic_response() -> None:
     )
 
     assert response.output_text == "Paris is in France."
+    assert response.input_tokens > 0
+    assert response.output_tokens > 0

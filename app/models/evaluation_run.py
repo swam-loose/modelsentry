@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -11,6 +12,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -63,6 +65,19 @@ class EvaluationRun(Base):
         CheckConstraint(
             "passed_cases + failed_cases <= succeeded_cases",
             name="ck_evaluation_runs_evaluated_within_succeeded",
+        ),
+        CheckConstraint(
+            "input_tokens >= 0 AND output_tokens >= 0",
+            name="ck_evaluation_runs_nonnegative_tokens",
+        ),
+        CheckConstraint(
+            "total_latency_ms >= 0 AND average_latency_ms >= 0 AND p95_latency_ms >= 0",
+            name="ck_evaluation_runs_nonnegative_latency_metrics",
+        ),
+        CheckConstraint(
+            "estimated_cost_usd >= 0 AND input_cost_per_million >= 0 "
+            "AND output_cost_per_million >= 0",
+            name="ck_evaluation_runs_nonnegative_cost_metrics",
         ),
     )
 
@@ -127,6 +142,60 @@ class EvaluationRun(Base):
         default=0,
         server_default="0",
     )
+    input_tokens: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    output_tokens: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    total_latency_ms: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    average_latency_ms: Mapped[Decimal] = mapped_column(
+        Numeric(12, 3),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    p95_latency_ms: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    estimated_cost_usd: Mapped[Decimal] = mapped_column(
+        Numeric(18, 8),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    input_cost_per_million: Mapped[Decimal] = mapped_column(
+        Numeric(14, 6),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    output_cost_per_million: Mapped[Decimal] = mapped_column(
+        Numeric(14, 6),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    token_usage_estimated: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
+    )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -171,6 +240,12 @@ class EvaluationRun(Base):
         return self.passed_cases / self.evaluated_cases
 
     @property
+    def total_tokens(self) -> int:
+        """Combined input and output token usage."""
+
+        return self.input_tokens + self.output_tokens
+
+    @property
     def approval_status(self) -> str:
         """Conservative aggregate of all immutable human review decisions."""
 
@@ -204,6 +279,14 @@ class EvaluationResult(Base):
         CheckConstraint(
             "latency_ms >= 0",
             name="ck_evaluation_results_nonnegative_latency",
+        ),
+        CheckConstraint(
+            "input_tokens >= 0 AND output_tokens >= 0",
+            name="ck_evaluation_results_nonnegative_tokens",
+        ),
+        CheckConstraint(
+            "estimated_cost_usd >= 0",
+            name="ck_evaluation_results_nonnegative_cost",
         ),
         UniqueConstraint(
             "run_id",
@@ -247,6 +330,30 @@ class EvaluationResult(Base):
     output_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    input_tokens: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    output_tokens: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    estimated_cost_usd: Mapped[Decimal] = mapped_column(
+        Numeric(18, 8),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    token_usage_estimated: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -260,6 +367,12 @@ class EvaluationResult(Base):
         cascade="all, delete-orphan",
         order_by="EvaluationCheck.position",
     )
+
+    @property
+    def total_tokens(self) -> int:
+        """Combined input and output token usage for this result."""
+
+        return self.input_tokens + self.output_tokens
 
 
 class EvaluationCheck(Base):

@@ -1,4 +1,6 @@
 from datetime import UTC, datetime
+from decimal import Decimal
+from math import ceil
 from uuid import UUID
 
 from sqlalchemy import select
@@ -41,12 +43,18 @@ class EvaluationRunRepository:
         provider: str,
         model_identifier: str,
         total_cases: int,
+        input_cost_per_million: Decimal,
+        output_cost_per_million: Decimal,
+        token_usage_estimated: bool,
     ) -> EvaluationRun:
         run = EvaluationRun(
             **payload.model_dump(),
             provider=provider,
             model_identifier=model_identifier,
             total_cases=total_cases,
+            input_cost_per_million=input_cost_per_million,
+            output_cost_per_million=output_cost_per_million,
+            token_usage_estimated=token_usage_estimated,
         )
         self.session.add(run)
         self.session.commit()
@@ -74,6 +82,23 @@ class EvaluationRunRepository:
         run.failed_cases = sum(
             result.evaluation_status == "failed" for result in results
         )
+        run.input_tokens = sum((result.input_tokens or 0) for result in results)
+        run.output_tokens = sum((result.output_tokens or 0) for result in results)
+        run.total_latency_ms = sum(result.latency_ms for result in results)
+        run.estimated_cost_usd = sum(
+            (result.estimated_cost_usd or Decimal("0") for result in results),
+            Decimal("0"),
+        )
+        successful_latencies = sorted(
+            result.latency_ms for result in results if result.status == "succeeded"
+        )
+        if successful_latencies:
+            run.average_latency_ms = (
+                Decimal(sum(successful_latencies)) / Decimal(len(successful_latencies))
+            ).quantize(Decimal("0.001"))
+            run.p95_latency_ms = successful_latencies[
+                ceil(len(successful_latencies) * 0.95) - 1
+            ]
         run.status = "completed"
         run.completed_at = datetime.now(UTC)
         self.session.commit()

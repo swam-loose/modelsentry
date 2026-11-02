@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.routes.comparisons import router as comparisons_router
 from app.api.routes.datasets import router as datasets_router
 from app.api.routes.health import router as health_router
 from app.api.routes.models import router as models_router
@@ -32,6 +33,7 @@ def create_app(*, database_url: str | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.session_factory = session_factory
+    application.include_router(comparisons_router, prefix=settings.api_prefix)
     application.include_router(datasets_router, prefix=settings.api_prefix)
     application.include_router(health_router, prefix=settings.api_prefix)
     application.include_router(models_router, prefix=settings.api_prefix)

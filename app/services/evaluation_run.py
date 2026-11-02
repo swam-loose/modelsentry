@@ -1,3 +1,4 @@
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -23,6 +24,22 @@ class EvaluationRunService:
 
     def __init__(self, session: Session) -> None:
         self.repository = EvaluationRunRepository(session)
+
+    @staticmethod
+    def estimate_cost(
+        *,
+        input_tokens: int,
+        output_tokens: int,
+        input_cost_per_million: Decimal,
+        output_cost_per_million: Decimal,
+    ) -> Decimal:
+        """Calculate an auditable cost estimate from snapshotted rates."""
+
+        cost = (
+            Decimal(input_tokens) * input_cost_per_million
+            + Decimal(output_tokens) * output_cost_per_million
+        ) / Decimal(1_000_000)
+        return cost.quantize(Decimal("0.00000001"))
 
     def create_and_execute(self, payload: EvaluationRunCreate) -> EvaluationRun:
         model = self.repository.get_registered_model(payload.registered_model_id)
@@ -58,6 +75,9 @@ class EvaluationRunService:
             provider=model.provider,
             model_identifier=model.model_identifier,
             total_cases=len(dataset_version.cases),
+            input_cost_per_million=model.input_cost_per_million,
+            output_cost_per_million=model.output_cost_per_million,
+            token_usage_estimated=True,
         )
         self.repository.mark_running(run)
         provider = MockModelProvider(model.model_identifier)
@@ -97,6 +117,15 @@ class EvaluationRunService:
                         rendered_user_prompt=rendered_user_prompt,
                         output_text=response.output_text,
                         latency_ms=response.latency_ms,
+                        input_tokens=response.input_tokens,
+                        output_tokens=response.output_tokens,
+                        estimated_cost_usd=self.estimate_cost(
+                            input_tokens=response.input_tokens,
+                            output_tokens=response.output_tokens,
+                            input_cost_per_million=run.input_cost_per_million,
+                            output_cost_per_million=run.output_cost_per_million,
+                        ),
+                        token_usage_estimated=True,
                     )
                     result.checks.extend(
                         EvaluationCheck(

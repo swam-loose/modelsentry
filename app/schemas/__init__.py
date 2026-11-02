@@ -43,9 +43,19 @@ from app.schemas.prompt import (
     PromptVersionCreate,
     PromptVersionRead,
 )
+from app.schemas.run_comparison import (
+    CaseComparisonRead,
+    ComparisonOutcome,
+    RunComparisonCreate,
+    RunComparisonRead,
+    RunMetricDelta,
+    RunMetricSnapshot,
+)
 
 __all__ = [
     "ApprovalStatus",
+    "CaseComparisonRead",
+    "ComparisonOutcome",
     "EvaluationCaseCreate",
     "EvaluationCaseRead",
     "EvaluationCheckRead",
@@ -78,4 +88,8 @@ __all__ = [
     "RegisteredModelCreate",
     "RegisteredModelRead",
     "RequiredTermsEvaluator",
+    "RunComparisonCreate",
+    "RunComparisonRead",
+    "RunMetricDelta",
+    "RunMetricSnapshot",
 ]

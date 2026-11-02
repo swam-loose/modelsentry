@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy.orm import Session
 
 from app.models.evaluation_run import EvaluationCheck, EvaluationResult
@@ -64,6 +66,9 @@ def test_repository_persists_run_transitions_and_results(
         provider="mock",
         model_identifier="deterministic-v1",
         total_cases=1,
+        input_cost_per_million=Decimal("0.50"),
+        output_cost_per_million=Decimal("1.50"),
+        token_usage_estimated=True,
     )
     repository.mark_running(run)
     repository.complete_run(
@@ -77,6 +82,9 @@ def test_repository_persists_run_transitions_and_results(
                 rendered_user_prompt="Question: What is the capital of France?",
                 output_text="Paris",
                 latency_ms=10,
+                input_tokens=12,
+                output_tokens=2,
+                estimated_cost_usd=Decimal("0.00000900"),
                 checks=[
                     EvaluationCheck(
                         position=0,
@@ -98,6 +106,13 @@ def test_repository_persists_run_transitions_and_results(
     assert run.passed_cases == 1
     assert run.failed_cases == 0
     assert run.pass_rate == 1.0
+    assert run.input_tokens == 12
+    assert run.output_tokens == 2
+    assert run.total_tokens == 14
+    assert run.total_latency_ms == 10
+    assert run.average_latency_ms == Decimal("10.000")
+    assert run.p95_latency_ms == 10
+    assert run.estimated_cost_usd == Decimal("0.00000900")
     assert run.results[0].checks[0].evaluator_type == "contains"
     assert repository.get_by_id(run.id) is run
     assert repository.list_all() == [run]

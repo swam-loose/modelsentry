@@ -10,6 +10,8 @@ def test_registered_model_metadata() -> None:
         "provider",
         "model_identifier",
         "description",
+        "input_cost_per_million",
+        "output_cost_per_million",
         "is_active",
         "created_at",
         "updated_at",

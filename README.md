@@ -14,7 +14,9 @@ paid AI API.
 
 The current API includes model registration, immutable prompt versions,
 versioned evaluation datasets with deterministic JSONL content hashes, and
-reproducible evaluation runs powered by a local mock provider.
+reproducible evaluation runs powered by a local mock provider. Runs expose
+deterministic evaluator evidence, human review state, usage metrics, estimated
+cost, and baseline-versus-candidate comparisons.
 
 ## Requirements
 
@@ -118,6 +120,28 @@ authentication and role-based authorization remain explicit roadmap items, so
 the local workflow is auditable but must not yet be treated as proof of a
 reviewer's real-world identity.
 
+## A/B run comparisons and cost evidence
+
+Registering a model accepts optional `input_cost_per_million` and
+`output_cost_per_million` USD rates. Each run snapshots those rates so that
+historical cost estimates do not change when registry pricing is updated.
+Case and run responses expose input/output tokens, estimated cost, total and
+average latency, and p95 latency.
+
+The local mock provider estimates token usage deterministically from UTF-8
+content; `token_usage_estimated` makes that limitation explicit. Future remote
+provider adapters should persist provider-reported usage instead.
+
+Compare two completed runs through `POST /api/v1/run-comparisons` with
+`baseline_run_id` and `candidate_run_id`. Both runs must use the same immutable
+dataset version. The response aligns cases by ID and reports quality,
+performance, token, latency, and cost deltas with `improved`, `regressed`,
+`mixed`, `unchanged`, or `inconclusive` outcomes.
+
+Comparison outcomes are evidence summaries, not release approvals. ModelSentry
+does not promote a candidate automatically; deterministic checks and human
+review remain separately visible.
+
 ## Quality checks
 
 ```powershell
@@ -128,8 +152,8 @@ python -m pytest --cov=app --cov-report=term-missing
 
 ## Initial roadmap
 
-1. Model and prompt registry
-2. Versioned JSONL evaluation datasets
-3. A/B comparison, latency, and cost metrics
-4. Evidence-backed release quality gates
+1. Model and prompt registry — complete
+2. Versioned JSONL evaluation datasets — complete
+3. A/B comparison, latency, and cost metrics — complete
+4. Evidence-backed release quality gates — next
 5. Authentication and role-based access control
