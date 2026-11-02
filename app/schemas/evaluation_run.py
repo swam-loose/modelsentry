@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 
@@ -53,6 +54,11 @@ class EvaluationResultRead(BaseModel):
     output_text: str | None
     error_message: str | None
     latency_ms: int
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+    estimated_cost_usd: Decimal
+    token_usage_estimated: bool
     created_at: datetime
     checks: list[EvaluationCheckRead]
 
@@ -76,6 +82,16 @@ class EvaluationRunRead(BaseModel):
     failed_cases: int
     evaluated_cases: int
     pass_rate: float | None
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+    total_latency_ms: int
+    average_latency_ms: Decimal
+    p95_latency_ms: int
+    estimated_cost_usd: Decimal
+    input_cost_per_million: Decimal
+    output_cost_per_million: Decimal
+    token_usage_estimated: bool
     approval_status: ApprovalStatus
     error_message: str | None
     created_at: datetime

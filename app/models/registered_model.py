@@ -1,10 +1,12 @@
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -31,6 +33,14 @@ class RegisteredModel(Base):
             "model_identifier",
             name="uq_registered_models_provider_identifier",
         ),
+        CheckConstraint(
+            "input_cost_per_million >= 0",
+            name="ck_registered_models_nonnegative_input_cost",
+        ),
+        CheckConstraint(
+            "output_cost_per_million >= 0",
+            name="ck_registered_models_nonnegative_output_cost",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(
@@ -53,6 +63,18 @@ class RegisteredModel(Base):
     )
     model_identifier: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    input_cost_per_million: Mapped[Decimal] = mapped_column(
+        Numeric(14, 6),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
+    output_cost_per_million: Mapped[Decimal] = mapped_column(
+        Numeric(14, 6),
+        nullable=False,
+        default=Decimal("0"),
+        server_default="0",
+    )
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,

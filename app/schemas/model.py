@@ -1,8 +1,9 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 ModelProvider = Literal["mock", "ollama"]
 ModelName = Annotated[
@@ -26,6 +27,10 @@ ModelDescription = Annotated[
     str,
     StringConstraints(strip_whitespace=True, max_length=1000),
 ]
+CostRate = Annotated[
+    Decimal,
+    Field(ge=0, max_digits=14, decimal_places=6),
+]
 
 
 class RegisteredModelCreate(BaseModel):
@@ -36,6 +41,8 @@ class RegisteredModelCreate(BaseModel):
     provider: ModelProvider = "mock"
     model_identifier: ModelIdentifier
     description: ModelDescription | None = None
+    input_cost_per_million: CostRate = Decimal("0")
+    output_cost_per_million: CostRate = Decimal("0")
 
     model_config = ConfigDict(extra="forbid")
 
@@ -49,6 +56,8 @@ class RegisteredModelRead(BaseModel):
     provider: ModelProvider
     model_identifier: str
     description: str | None
+    input_cost_per_million: Decimal
+    output_cost_per_million: Decimal
     is_active: bool
     created_at: datetime
     updated_at: datetime

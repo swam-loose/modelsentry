@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from pydantic import ValidationError
 
@@ -14,6 +16,8 @@ def test_model_create_accepts_and_normalizes_valid_data() -> None:
     assert payload.name == "Mock Evaluator"
     assert payload.provider == "mock"
     assert payload.model_identifier == "deterministic-v1"
+    assert payload.input_cost_per_million == Decimal("0")
+    assert payload.output_cost_per_million == Decimal("0")
 
 
 @pytest.mark.parametrize(
@@ -22,6 +26,8 @@ def test_model_create_accepts_and_normalizes_valid_data() -> None:
         ("slug", "Invalid Slug"),
         ("provider", "unknown"),
         ("model_identifier", ""),
+        ("input_cost_per_million", "-0.01"),
+        ("output_cost_per_million", "-0.01"),
     ],
 )
 def test_model_create_rejects_invalid_data(field: str, value: str) -> None:

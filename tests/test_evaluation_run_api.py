@@ -82,12 +82,25 @@ def test_create_list_and_get_mock_evaluation_run(client: TestClient) -> None:
     assert created["evaluated_cases"] == 2
     assert created["pass_rate"] == 1.0
     assert created["approval_status"] == "not_requested"
+    assert created["input_tokens"] > 0
+    assert created["output_tokens"] > 0
+    assert created["total_tokens"] == (
+        created["input_tokens"] + created["output_tokens"]
+    )
+    assert created["total_latency_ms"] > 0
+    assert float(created["average_latency_ms"]) > 0
+    assert created["p95_latency_ms"] > 0
+    assert created["estimated_cost_usd"] == "0E-8"
+    assert created["token_usage_estimated"] is True
     assert created["reviews"] == []
     assert [result["position"] for result in created["results"]] == [0, 1]
     assert created["results"][0]["output_text"] == ("Paris is the capital of France.")
     assert created["results"][0]["evaluation_status"] == "passed"
     assert created["results"][0]["checks"][0]["evaluator_type"] == "contains"
     assert created["results"][0]["checks"][0]["passed"] is True
+    assert created["results"][0]["input_tokens"] > 0
+    assert created["results"][0]["output_tokens"] > 0
+    assert created["results"][0]["total_tokens"] > 0
 
     list_response = client.get("/api/v1/runs")
     get_response = client.get(f"/api/v1/runs/{created['id']}")

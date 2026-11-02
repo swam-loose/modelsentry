@@ -23,6 +23,8 @@ def test_create_and_get_registered_model(client: TestClient) -> None:
     assert created["slug"] == "mock-evaluator"
     assert created["provider"] == "mock"
     assert created["is_active"] is True
+    assert created["input_cost_per_million"] == "0.000000"
+    assert created["output_cost_per_million"] == "0.000000"
 
     get_response = client.get(f"/api/v1/models/{created['id']}")
 

@@ -25,6 +25,11 @@ from app.services.prompt_registry import (
     PromptRegistryNotFoundError,
     PromptRegistryService,
 )
+from app.services.run_comparison import (
+    RunComparisonConflictError,
+    RunComparisonNotFoundError,
+    RunComparisonService,
+)
 
 __all__ = [
     "DatasetContentTooLargeError",
@@ -44,4 +49,7 @@ __all__ = [
     "PromptRegistryConflictError",
     "PromptRegistryNotFoundError",
     "PromptRegistryService",
+    "RunComparisonConflictError",
+    "RunComparisonNotFoundError",
+    "RunComparisonService",
 ]

@@ -35,6 +35,17 @@ def test_migrations_upgrade_and_downgrade(
         "prompts",
         "registered_models",
     } <= table_names
+    run_columns = {
+        column["name"] for column in inspect(engine).get_columns("evaluation_runs")
+    }
+    assert {
+        "average_latency_ms",
+        "estimated_cost_usd",
+        "input_tokens",
+        "output_tokens",
+        "p95_latency_ms",
+        "total_latency_ms",
+    } <= run_columns
     engine.dispose()
 
     command.downgrade(config, "base")
