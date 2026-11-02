@@ -24,6 +24,13 @@ from app.schemas.evaluator import (
     JsonSchemaEvaluator,
     RequiredTermsEvaluator,
 )
+from app.schemas.human_review import (
+    ApprovalStatus,
+    HumanReviewCreate,
+    HumanReviewDecision,
+    HumanReviewRead,
+    HumanReviewStatus,
+)
 from app.schemas.model import (
     ModelProvider,
     RegisteredModelCreate,
@@ -38,6 +45,7 @@ from app.schemas.prompt import (
 )
 
 __all__ = [
+    "ApprovalStatus",
     "EvaluationCaseCreate",
     "EvaluationCaseRead",
     "EvaluationCheckRead",
@@ -57,6 +65,10 @@ __all__ = [
     "ForbiddenTermsEvaluator",
     "JsonEqualsEvaluator",
     "JsonSchemaEvaluator",
+    "HumanReviewCreate",
+    "HumanReviewDecision",
+    "HumanReviewRead",
+    "HumanReviewStatus",
     "ModelProvider",
     "PromptCreate",
     "PromptDetailRead",

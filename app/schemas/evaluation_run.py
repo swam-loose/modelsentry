@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, JsonValue
 
+from app.schemas.human_review import ApprovalStatus, HumanReviewRead
+
 EvaluationRunStatus = Literal["pending", "running", "completed", "failed"]
 EvaluationResultStatus = Literal["succeeded", "error"]
 DeterministicEvaluationStatus = Literal["not_evaluated", "passed", "failed"]
@@ -74,6 +76,7 @@ class EvaluationRunRead(BaseModel):
     failed_cases: int
     evaluated_cases: int
     pass_rate: float | None
+    approval_status: ApprovalStatus
     error_message: str | None
     created_at: datetime
     started_at: datetime | None
@@ -86,3 +89,4 @@ class EvaluationRunDetailRead(EvaluationRunRead):
     """Evaluation run summary together with ordered case-level results."""
 
     results: list[EvaluationResultRead]
+    reviews: list[HumanReviewRead]

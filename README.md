@@ -100,6 +100,24 @@ For compatibility, concise forms such as `{"contains":"Paris"}` remain
 valid. Run responses expose every evaluator decision, its expected and actual
 evidence, case-level status, aggregate passed and failed counts, and pass rate.
 
+## Human review and approval
+
+Completed runs can be assigned to human reviewers through `POST
+/api/v1/reviews`. The review queue supports filtering by run, reviewer, and
+status. A reviewer submits one final `approved` or `rejected` decision through
+`PATCH /api/v1/reviews/{review_id}`; rejections require a rationale and decided
+reviews cannot be rewritten.
+
+Run responses expose a conservative aggregate approval status. Any rejection
+marks the run as rejected, pending assignments block approval, and only runs
+whose requested reviews are all approved become approved. Automated evaluator
+results never create a human approval decision.
+
+Version 0.1 records reviewer identifiers supplied by the API caller. Identity
+authentication and role-based authorization remain explicit roadmap items, so
+the local workflow is auditable but must not yet be treated as proof of a
+reviewer's real-world identity.
+
 ## Quality checks
 
 ```powershell
@@ -112,7 +130,6 @@ python -m pytest --cov=app --cov-report=term-missing
 
 1. Model and prompt registry
 2. Versioned JSONL evaluation datasets
-3. Human review and approval workflow
-4. A/B comparison, latency, and cost metrics
-5. Evidence-backed release quality gates
-
+3. A/B comparison, latency, and cost metrics
+4. Evidence-backed release quality gates
+5. Authentication and role-based access control

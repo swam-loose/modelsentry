@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         EvaluationCase,
         EvaluationDatasetVersion,
     )
+    from app.models.human_review import HumanReview
     from app.models.prompt import PromptVersion
     from app.models.registered_model import RegisteredModel
 
@@ -149,6 +150,11 @@ class EvaluationRun(Base):
         cascade="all, delete-orphan",
         order_by="EvaluationResult.position",
     )
+    reviews: Mapped[list[HumanReview]] = relationship(
+        back_populates="run",
+        cascade="all, delete-orphan",
+        order_by="HumanReview.created_at, HumanReview.id",
+    )
 
     @property
     def evaluated_cases(self) -> int:
@@ -163,6 +169,19 @@ class EvaluationRun(Base):
         if self.evaluated_cases == 0:
             return None
         return self.passed_cases / self.evaluated_cases
+
+    @property
+    def approval_status(self) -> str:
+        """Conservative aggregate of all immutable human review decisions."""
+
+        if not self.reviews:
+            return "not_requested"
+        statuses = {review.status for review in self.reviews}
+        if "rejected" in statuses:
+            return "rejected"
+        if "pending" in statuses:
+            return "pending"
+        return "approved"
 
 
 class EvaluationResult(Base):

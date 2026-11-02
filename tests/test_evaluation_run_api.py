@@ -81,6 +81,8 @@ def test_create_list_and_get_mock_evaluation_run(client: TestClient) -> None:
     assert created["failed_cases"] == 0
     assert created["evaluated_cases"] == 2
     assert created["pass_rate"] == 1.0
+    assert created["approval_status"] == "not_requested"
+    assert created["reviews"] == []
     assert [result["position"] for result in created["results"]] == [0, 1]
     assert created["results"][0]["output_text"] == ("Paris is the capital of France.")
     assert created["results"][0]["evaluation_status"] == "passed"
