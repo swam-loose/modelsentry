@@ -16,7 +16,8 @@ The current API includes model registration, immutable prompt versions,
 versioned evaluation datasets with deterministic JSONL content hashes, and
 reproducible evaluation runs powered by a local mock provider. Runs expose
 deterministic evaluator evidence, human review state, usage metrics, estimated
-cost, and baseline-versus-candidate comparisons.
+cost, baseline-versus-candidate comparisons, and immutable release-gate
+decisions.
 
 ## Requirements
 
@@ -142,6 +143,26 @@ Comparison outcomes are evidence summaries, not release approvals. ModelSentry
 does not promote a candidate automatically; deterministic checks and human
 review remain separately visible.
 
+## Evidence-backed release quality gates
+
+Register a gate through `POST /api/v1/release-gates`. Every gate begins with an
+immutable policy version and can receive new versions without rewriting prior
+criteria. Policies can enforce a minimum pass rate, a maximum error count,
+optional average and p95 latency limits, an optional estimated-cost limit,
+human approval, and no deterministic quality regression against a baseline.
+
+Evaluate a completed candidate through `POST
+/api/v1/release-gates/{gate_id}/evaluations`. ModelSentry snapshots the latest
+policy version, candidate run, optional baseline run, final `passed` or
+`failed` status, and an ordered expected-versus-actual evidence record for
+every configured check. Historical decisions therefore remain reproducible
+when a gate later receives stricter or looser criteria.
+
+The default policy is intentionally conservative: 100% pass rate, zero
+errored cases, human approval, and no quality regression. A gate decision is a
+governance artifact only; ModelSentry never deploys, promotes, or rolls back a
+model automatically.
+
 ## Quality checks
 
 ```powershell
@@ -155,5 +176,5 @@ python -m pytest --cov=app --cov-report=term-missing
 1. Model and prompt registry — complete
 2. Versioned JSONL evaluation datasets — complete
 3. A/B comparison, latency, and cost metrics — complete
-4. Evidence-backed release quality gates — next
-5. Authentication and role-based access control
+4. Evidence-backed release quality gates — complete
+5. Authentication and role-based access control — next
