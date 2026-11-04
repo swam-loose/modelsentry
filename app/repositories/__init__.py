@@ -6,6 +6,7 @@ from app.repositories.prompt_registry import PromptRegistryRepository
 from app.repositories.release_gate import ReleaseGateRepository
 
 __all__ = [
+    "AuthRepository",
     "EvaluationDatasetRepository",
     "EvaluationRunRepository",
     "HumanReviewRepository",
@@ -13,3 +14,4 @@ __all__ = [
     "PromptRegistryRepository",
     "ReleaseGateRepository",
 ]
+from app.repositories.auth import AuthRepository

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import Settings, get_settings
+from app.core.config import DEFAULT_API_KEY_PEPPER, Settings, get_settings
 
 
 def test_default_settings() -> None:
@@ -14,6 +14,8 @@ def test_default_settings() -> None:
     assert settings.environment == "development"
     assert settings.api_prefix == "/api/v1"
     assert settings.database_url == "sqlite:///./modelsentry.db"
+    assert settings.api_key_pepper.get_secret_value() == DEFAULT_API_KEY_PEPPER
+    assert settings.bootstrap_token is None
 
 
 def test_environment_overrides_dotenv(
@@ -24,11 +26,21 @@ def test_environment_overrides_dotenv(
         encoding="utf-8",
     )
     monkeypatch.setenv("MODELSENTRY_ENVIRONMENT", "production")
+    monkeypatch.setenv("MODELSENTRY_API_KEY_PEPPER", "production-secret-pepper")
 
     settings = Settings()
 
     assert settings.environment == "production"
     assert settings.app_name == "From dotenv"
+
+
+def test_production_rejects_development_api_key_pepper(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("MODELSENTRY_ENVIRONMENT", "production")
+
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
 
 
 def test_invalid_environment(monkeypatch: pytest.MonkeyPatch) -> None:

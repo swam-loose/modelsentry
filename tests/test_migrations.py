@@ -24,6 +24,7 @@ def test_migrations_upgrade_and_downgrade(
     engine = create_engine(database_url)
     table_names = set(inspect(engine).get_table_names())
     assert {
+        "api_keys",
         "evaluation_cases",
         "evaluation_checks",
         "evaluation_dataset_versions",
@@ -38,6 +39,7 @@ def test_migrations_upgrade_and_downgrade(
         "release_gate_evaluations",
         "release_gate_versions",
         "release_gates",
+        "user_accounts",
     } <= table_names
     run_columns = {
         column["name"] for column in inspect(engine).get_columns("evaluation_runs")
@@ -58,6 +60,7 @@ def test_migrations_upgrade_and_downgrade(
     table_names = set(inspect(engine).get_table_names())
     assert (
         not {
+            "api_keys",
             "evaluation_cases",
             "evaluation_checks",
             "evaluation_dataset_versions",
@@ -72,6 +75,7 @@ def test_migrations_upgrade_and_downgrade(
             "release_gate_evaluations",
             "release_gate_versions",
             "release_gates",
+            "user_accounts",
         }
         & table_names
     )
