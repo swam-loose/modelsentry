@@ -8,6 +8,8 @@ from app.api.routes.datasets import router as datasets_router
 from app.api.routes.health import router as health_router
 from app.api.routes.models import router as models_router
 from app.api.routes.prompts import router as prompts_router
+from app.api.routes.release_gates import evaluation_router as gate_evaluations_router
+from app.api.routes.release_gates import router as release_gates_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.runs import router as runs_router
 from app.core.config import get_settings
@@ -39,6 +41,8 @@ def create_app(*, database_url: str | None = None) -> FastAPI:
     application.include_router(models_router, prefix=settings.api_prefix)
     application.include_router(prompts_router, prefix=settings.api_prefix)
     application.include_router(reviews_router, prefix=settings.api_prefix)
+    application.include_router(release_gates_router, prefix=settings.api_prefix)
+    application.include_router(gate_evaluations_router, prefix=settings.api_prefix)
     application.include_router(runs_router, prefix=settings.api_prefix)
     return application
 

@@ -34,6 +34,10 @@ def test_migrations_upgrade_and_downgrade(
         "prompt_versions",
         "prompts",
         "registered_models",
+        "release_gate_checks",
+        "release_gate_evaluations",
+        "release_gate_versions",
+        "release_gates",
     } <= table_names
     run_columns = {
         column["name"] for column in inspect(engine).get_columns("evaluation_runs")
@@ -64,6 +68,10 @@ def test_migrations_upgrade_and_downgrade(
             "prompt_versions",
             "prompts",
             "registered_models",
+            "release_gate_checks",
+            "release_gate_evaluations",
+            "release_gate_versions",
+            "release_gates",
         }
         & table_names
     )

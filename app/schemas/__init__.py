@@ -43,6 +43,17 @@ from app.schemas.prompt import (
     PromptVersionCreate,
     PromptVersionRead,
 )
+from app.schemas.release_gate import (
+    ReleaseGateCheckRead,
+    ReleaseGateCreate,
+    ReleaseGateDetailRead,
+    ReleaseGateEvaluationCreate,
+    ReleaseGateEvaluationRead,
+    ReleaseGateEvaluationStatus,
+    ReleaseGateRead,
+    ReleaseGateVersionCreate,
+    ReleaseGateVersionRead,
+)
 from app.schemas.run_comparison import (
     CaseComparisonRead,
     ComparisonOutcome,
@@ -87,6 +98,15 @@ __all__ = [
     "PromptVersionRead",
     "RegisteredModelCreate",
     "RegisteredModelRead",
+    "ReleaseGateCheckRead",
+    "ReleaseGateCreate",
+    "ReleaseGateDetailRead",
+    "ReleaseGateEvaluationCreate",
+    "ReleaseGateEvaluationRead",
+    "ReleaseGateEvaluationStatus",
+    "ReleaseGateRead",
+    "ReleaseGateVersionCreate",
+    "ReleaseGateVersionRead",
     "RequiredTermsEvaluator",
     "RunComparisonCreate",
     "RunComparisonRead",

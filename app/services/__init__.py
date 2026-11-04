@@ -25,6 +25,11 @@ from app.services.prompt_registry import (
     PromptRegistryNotFoundError,
     PromptRegistryService,
 )
+from app.services.release_gate import (
+    ReleaseGateConflictError,
+    ReleaseGateNotFoundError,
+    ReleaseGateService,
+)
 from app.services.run_comparison import (
     RunComparisonConflictError,
     RunComparisonNotFoundError,
@@ -49,6 +54,9 @@ __all__ = [
     "PromptRegistryConflictError",
     "PromptRegistryNotFoundError",
     "PromptRegistryService",
+    "ReleaseGateConflictError",
+    "ReleaseGateNotFoundError",
+    "ReleaseGateService",
     "RunComparisonConflictError",
     "RunComparisonNotFoundError",
     "RunComparisonService",
