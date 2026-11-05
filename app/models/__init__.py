@@ -1,3 +1,4 @@
+from app.models.auth import ApiKey, UserAccount
 from app.models.evaluation_dataset import (
     EvaluationCase,
     EvaluationDataset,
@@ -15,6 +16,7 @@ from app.models.release_gate import (
 )
 
 __all__ = [
+    "ApiKey",
     "EvaluationCase",
     "EvaluationDataset",
     "EvaluationDatasetVersion",
@@ -29,4 +31,5 @@ __all__ = [
     "ReleaseGateCheck",
     "ReleaseGateEvaluation",
     "ReleaseGateVersion",
+    "UserAccount",
 ]

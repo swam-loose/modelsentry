@@ -17,7 +17,8 @@ versioned evaluation datasets with deterministic JSONL content hashes, and
 reproducible evaluation runs powered by a local mock provider. Runs expose
 deterministic evaluator evidence, human review state, usage metrics, estimated
 cost, baseline-versus-candidate comparisons, and immutable release-gate
-decisions.
+decisions. Local API-key authentication and role-based authorization protect
+all product resources while keeping the health endpoint public.
 
 ## Requirements
 
@@ -35,6 +36,12 @@ python -m pip install --editable ".[dev]"
 python -m alembic upgrade head
 ```
 
+Create a local `.env` from `.env.example` and replace both documented secret
+placeholders. `MODELSENTRY_API_KEY_PEPPER` protects stored API-key digests and
+must remain stable for existing keys to work. `MODELSENTRY_BOOTSTRAP_TOKEN`
+authorizes only the first administrator bootstrap. Production startup rejects
+the documented development pepper.
+
 ## Run the API
 
 ```powershell
@@ -42,6 +49,35 @@ python -m uvicorn app.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` for the interactive API documentation.
+
+## Authentication and role-based access control
+
+After applying migrations, create the first administrator exactly once through
+`POST /api/v1/auth/bootstrap`, supplying `X-Bootstrap-Token`. The response
+contains an `msk_...` bearer API key exactly once. Store it securely and send
+it on protected requests as `Authorization: Bearer <api-key>`.
+
+```powershell
+$headers = @{"X-Bootstrap-Token"=$env:MODELSENTRY_BOOTSTRAP_TOKEN}; $body = '{"email":"admin@example.com","display_name":"Administrator"}'; $bootstrap = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/auth/bootstrap" -Headers $headers -ContentType "application/json" -Body $body; $apiKey = $bootstrap.credential.api_key
+```
+
+ModelSentry stores only an HMAC-SHA-256 digest and a non-secret key prefix.
+Administrators can register identities, issue expiring credentials, inspect
+credential metadata, and revoke keys. Revocation is irreversible; audit
+metadata remains available, while raw keys and digests are never returned by
+list endpoints.
+
+| Role | Effective access |
+| --- | --- |
+| `admin` | Identity administration and all product operations |
+| `operator` | Read access and product operations, excluding review decisions |
+| `reviewer` | Read access and final human-review decisions |
+| `viewer` | Read-only access |
+
+Use `GET /api/v1/auth/me` to inspect the authenticated user, credential ID,
+role, and effective permission labels. ModelSentry v0.1 deliberately uses
+local API keys rather than passwords or an external identity provider; OAuth,
+SSO, and organization-level identity federation remain future integrations.
 
 ## Database migrations
 
@@ -171,10 +207,14 @@ python -m ruff format --check app tests migrations
 python -m pytest --cov=app --cov-report=term-missing
 ```
 
-## Initial roadmap
+## Version 0.1 roadmap
 
 1. Model and prompt registry — complete
 2. Versioned JSONL evaluation datasets — complete
 3. A/B comparison, latency, and cost metrics — complete
 4. Evidence-backed release quality gates — complete
-5. Authentication and role-based access control — next
+5. Authentication and role-based access control — complete
+
+Version 0.1 now provides an end-to-end local evaluation and governance path.
+Future milestones can add an Ollama adapter, asynchronous execution, CI release
+checks, organization isolation, and external identity-provider integration.

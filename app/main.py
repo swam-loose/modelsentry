@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
+from app.api.routes.auth import router as auth_router
 from app.api.routes.comparisons import router as comparisons_router
 from app.api.routes.datasets import router as datasets_router
 from app.api.routes.health import router as health_router
@@ -12,6 +13,7 @@ from app.api.routes.release_gates import evaluation_router as gate_evaluations_r
 from app.api.routes.release_gates import router as release_gates_router
 from app.api.routes.reviews import router as reviews_router
 from app.api.routes.runs import router as runs_router
+from app.auth.security import authorize_api_request
 from app.core.config import get_settings
 from app.db.session import create_db_engine, create_session_factory
 
@@ -35,15 +37,49 @@ def create_app(*, database_url: str | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.session_factory = session_factory
-    application.include_router(comparisons_router, prefix=settings.api_prefix)
-    application.include_router(datasets_router, prefix=settings.api_prefix)
+    protected = [Depends(authorize_api_request)]
+    application.include_router(auth_router, prefix=settings.api_prefix)
     application.include_router(health_router, prefix=settings.api_prefix)
-    application.include_router(models_router, prefix=settings.api_prefix)
-    application.include_router(prompts_router, prefix=settings.api_prefix)
-    application.include_router(reviews_router, prefix=settings.api_prefix)
-    application.include_router(release_gates_router, prefix=settings.api_prefix)
-    application.include_router(gate_evaluations_router, prefix=settings.api_prefix)
-    application.include_router(runs_router, prefix=settings.api_prefix)
+    application.include_router(
+        comparisons_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        datasets_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        models_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        prompts_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        reviews_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        release_gates_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        gate_evaluations_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
+    application.include_router(
+        runs_router,
+        prefix=settings.api_prefix,
+        dependencies=protected,
+    )
     return application
 
 

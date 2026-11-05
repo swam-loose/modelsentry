@@ -64,9 +64,14 @@ from app.schemas.run_comparison import (
 )
 
 __all__ = [
+    "ApiKeyCreate",
+    "ApiKeyRead",
     "ApprovalStatus",
+    "BootstrapAdminCreate",
+    "BootstrapAdminRead",
     "CaseComparisonRead",
     "ComparisonOutcome",
+    "CurrentPrincipalRead",
     "EvaluationCaseCreate",
     "EvaluationCaseRead",
     "EvaluationCheckRead",
@@ -86,6 +91,7 @@ __all__ = [
     "ForbiddenTermsEvaluator",
     "JsonEqualsEvaluator",
     "JsonSchemaEvaluator",
+    "IssuedApiKeyRead",
     "HumanReviewCreate",
     "HumanReviewDecision",
     "HumanReviewRead",
@@ -96,6 +102,7 @@ __all__ = [
     "PromptRead",
     "PromptVersionCreate",
     "PromptVersionRead",
+    "PermissionName",
     "RegisteredModelCreate",
     "RegisteredModelRead",
     "ReleaseGateCheckRead",
@@ -112,4 +119,19 @@ __all__ = [
     "RunComparisonRead",
     "RunMetricDelta",
     "RunMetricSnapshot",
+    "RoleName",
+    "UserCreate",
+    "UserRead",
 ]
+from app.schemas.auth import (
+    ApiKeyCreate,
+    ApiKeyRead,
+    BootstrapAdminCreate,
+    BootstrapAdminRead,
+    CurrentPrincipalRead,
+    IssuedApiKeyRead,
+    PermissionName,
+    RoleName,
+    UserCreate,
+    UserRead,
+)

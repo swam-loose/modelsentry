@@ -37,6 +37,10 @@ from app.services.run_comparison import (
 )
 
 __all__ = [
+    "AuthConflictError",
+    "AuthenticationError",
+    "AuthNotFoundError",
+    "AuthService",
     "DatasetContentTooLargeError",
     "DatasetRegistryConflictError",
     "DatasetRegistryNotFoundError",
@@ -48,6 +52,7 @@ __all__ = [
     "HumanReviewConflictError",
     "HumanReviewNotFoundError",
     "HumanReviewService",
+    "IssuedCredential",
     "ModelRegistryConflictError",
     "ModelRegistryNotFoundError",
     "ModelRegistryService",
@@ -61,3 +66,10 @@ __all__ = [
     "RunComparisonNotFoundError",
     "RunComparisonService",
 ]
+from app.services.auth import (
+    AuthConflictError,
+    AuthenticationError,
+    AuthNotFoundError,
+    AuthService,
+    IssuedCredential,
+)
