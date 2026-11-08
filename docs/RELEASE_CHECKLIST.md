@@ -1,6 +1,8 @@
 # Release 0.1.0 checklist
 
-This is a release candidate checklist, not an automatic publication workflow.
+This is a reusable publication checklist, not a live release-status page or an
+automatic publication workflow. Unchecked boxes below are the procedure to
+repeat for each release, not a claim that published releases are unvalidated.
 Do not create a tag, GitHub Release, PyPI upload, or deployment merely because
 the validation commands pass.
 
@@ -60,3 +62,22 @@ still requires the source checkout or unpacked source distribution.
 
 CI has only `contents: read` permission, uses immutable action SHAs, and never
 publishes packages, creates release tags, or deploys the application.
+
+## Version 0.1.0 preparation record
+
+- The maintainer explicitly approved MIT licensing, tag `v0.1.0`, a public
+  GitHub Release, and wheel/source assets. PyPI upload and deployment are not
+  authorized or included.
+- The application baseline `9c919c7440b3c9901e16852e4500bbc1cb7de247` passed
+  [its main-branch CI run](https://github.com/swam-loose/modelsentry/actions/runs/42505613135):
+  216 tests, 95.10% application coverage, Windows/Linux checks, migrations,
+  distribution inspection, and an isolated installed-wheel smoke test.
+- The maintainer ran the isolated synthetic demo on Windows successfully.
+  Its simulated review is separate from the real publication approval above.
+- Final changes following that baseline are documentation-only. The final
+  tagged commit must pass its own main-branch CI. Attach that commit's CI
+  distributions, not artifacts from an earlier candidate.
+- [Versioned release notes](RELEASE_NOTES_0.1.0.md) describe the local/mock scope
+  and installation limits. The GitHub Release records the final commit, CI run,
+  artifact names, and SHA-256 checksums. Do not overwrite an existing tag or
+  release when publishing or retrying.
