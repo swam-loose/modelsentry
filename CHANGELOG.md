@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-No changes recorded yet.
+- Redesigned the repository README with a vector cover, product navigation,
+  demonstrated outcomes, architecture and capability maps, and release evidence.
+- Added installation and API guides, including safe local setup and corrected
+  PowerShell bootstrap instructions for `.env`-based configuration.
 
 ## [0.1.0] - 2026-11-08
 
