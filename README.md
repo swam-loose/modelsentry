@@ -204,6 +204,15 @@ errored cases, human approval, and no quality regression. A gate decision is a
 governance artifact only; ModelSentry never deploys, promotes, or rolls back a
 model automatically.
 
+## Synthetic end-to-end demo
+
+The [synthetic demo](docs/SYNTHETIC_DEMO.md) exercises the real API with a
+temporary migrated database, fresh random secrets, and no external model calls.
+It shows a blocked regression, a fixed run still blocked pending review, and a
+passing gate after an explicitly simulated decision by the assigned reviewer.
+Historical evidence remains unchanged, and the normal runtime database is not
+touched. See the demo guide for the one-line Windows command and expected output.
+
 ## Quality checks
 
 ```powershell
