@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="384" viewBox="0 0 1280 384" role="img" aria-labelledby="title desc">
+  <title id="title">ModelSentry — evaluate every model, govern every release</title>
+  <desc id="desc">A navy and turquoise banner connecting deterministic checks, assigned review, and an immutable quality-gate decision. Local mock API, Python 3.12, Windows and Linux, SQLite, MIT.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071321"/><stop offset="1" stop-color="#11263b"/></linearGradient>
+    <linearGradient id="accent"><stop stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#29435c" stroke-opacity=".22"/></pattern>
+  </defs>
+  <rect width="1280" height="384" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="384" rx="18" fill="url(#grid)"/>
+  <rect x="1" y="1" width="1278" height="382" rx="17" fill="none" stroke="#30465e"/>
+  <rect x="56" y="44" width="48" height="48" rx="12" fill="#123a45" stroke="#2dd4bf" stroke-opacity=".55"/>
+  <path d="M80 53L93 58V70C93 80 85 85 80 88C75 85 67 80 67 70V58Z" fill="none" stroke="#6ee7d8" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M73 69L78 74L87 63" fill="none" stroke="#6ee7d8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="122" y="64" font-size="12" letter-spacing="2" fill="#9ab6ca">AI EVALUATION</text>
+    <text x="122" y="84" font-size="12" letter-spacing="2" fill="#9ab6ca">RELEASE GOVERNANCE</text>
+    <text x="54" y="164" font-size="64" font-weight="700" letter-spacing="-2.2" fill="#eff8ff">ModelSentry</text>
+    <text x="58" y="211" font-size="25" font-weight="500" fill="#d3e3ef">Evaluate every model.</text>
+    <text x="58" y="246" font-size="25" font-weight="500" fill="#5ee3d0">Govern every release.</text>
+    <rect x="58" y="280" width="92" height="28" rx="7" fill="#152e43" stroke="#36536b"/>
+    <text x="104" y="299" text-anchor="middle" font-size="11" font-weight="600" letter-spacing="1" fill="#c0d4e4">API FIRST</text>
+    <rect x="161" y="280" width="119" height="28" rx="7" fill="#152e43" stroke="#36536b"/>
+    <text x="220" y="299" text-anchor="middle" font-size="11" font-weight="600" letter-spacing="1" fill="#c0d4e4">PYTHON 3.12</text>
+    <rect x="291" y="280" width="126" height="28" rx="7" fill="#123a45" stroke="#25796f"/>
+    <text x="354" y="299" text-anchor="middle" font-size="11" font-weight="600" letter-spacing="1" fill="#88e9db">LOCAL / MOCK</text>
+    <path d="M712 76V298" stroke="#2a5267" stroke-width="2"/>
+    <path d="M712 94H770M712 185H770M712 276H770" stroke="url(#accent)" stroke-width="2"/>
+    <circle cx="712" cy="94" r="5" fill="#2dd4bf"/><circle cx="712" cy="185" r="5" fill="#38bdf8"/><circle cx="712" cy="276" r="5" fill="#a5b4fc"/>
+    <rect x="770" y="55" width="452" height="78" rx="12" fill="#0d2235" stroke="#315267"/>
+    <rect x="770" y="55" width="4" height="78" rx="2" fill="#2dd4bf"/>
+    <text x="794" y="82" font-size="11" font-weight="700" letter-spacing="1.7" fill="#61ddca">01 / DETERMINISTIC CHECKS</text>
+    <text x="794" y="110" font-size="16" fill="#e1edf6">Rules with expected / actual evidence</text>
+    <rect x="770" y="146" width="452" height="78" rx="12" fill="#0d2235" stroke="#315267"/>
+    <rect x="770" y="146" width="4" height="78" rx="2" fill="#38bdf8"/>
+    <text x="794" y="173" font-size="11" font-weight="700" letter-spacing="1.7" fill="#7dd3fc">02 / ASSIGNED REVIEW</text>
+    <text x="794" y="201" font-size="16" fill="#e1edf6">Human decisions retain their actor</text>
+    <rect x="770" y="237" width="452" height="78" rx="12" fill="#0d2235" stroke="#315267"/>
+    <rect x="770" y="237" width="4" height="78" rx="2" fill="#a5b4fc"/>
+    <text x="794" y="264" font-size="11" font-weight="700" letter-spacing="1.7" fill="#c4b5fd">03 / QUALITY GATE</text>
+    <text x="794" y="292" font-size="16" fill="#e1edf6">Immutable pass / fail. Never a deployment.</text>
+    <path d="M58 336H1222" stroke="#29445b"/>
+    <text x="58" y="359" font-size="11" letter-spacing=".5" fill="#8caabd">v0.1.0   /   Windows + Linux   /   SQLite   /   MIT</text>
+    <text x="1222" y="359" text-anchor="end" font-size="11" letter-spacing=".3" fill="#8caabd">Versioned inputs. Reviewable outcomes.</text>
+  </g>
+</svg>
