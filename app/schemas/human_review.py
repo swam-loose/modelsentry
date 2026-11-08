@@ -67,5 +67,6 @@ class HumanReviewRead(BaseModel):
     rationale: str | None
     created_at: datetime
     decided_at: datetime | None
+    decided_by_user_id: UUID | None
 
     model_config = ConfigDict(from_attributes=True)

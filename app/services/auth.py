@@ -1,6 +1,6 @@
 import hmac
 import secrets
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from hashlib import sha256
 from uuid import UUID
@@ -36,7 +36,7 @@ class IssuedCredential:
     """Credential metadata and the raw secret returned exactly once."""
 
     api_key: ApiKey
-    raw_key: str
+    raw_key: str = field(repr=False)
 
 
 class AuthService:
@@ -63,6 +63,8 @@ class AuthService:
         user: UserAccount,
         payload: ApiKeyCreate,
     ) -> IssuedCredential:
+        if not user.is_active:
+            raise AuthConflictError("API keys cannot be issued to an inactive user.")
         if payload.expires_at is not None and payload.expires_at <= datetime.now(UTC):
             raise AuthConflictError("API-key expiration must be in the future.")
         raw_key = self.generate_api_key()
@@ -81,34 +83,33 @@ class AuthService:
         presented_token: str | None,
     ) -> tuple[UserAccount, IssuedCredential]:
         configured_token = self.settings.bootstrap_token
-        if configured_token is None or presented_token is None:
+        if (
+            configured_token is None
+            or not configured_token.get_secret_value().strip()
+            or presented_token is None
+        ):
             raise AuthenticationError("Administrator bootstrap is not authorized.")
         if not hmac.compare_digest(
-            configured_token.get_secret_value(),
-            presented_token,
+            configured_token.get_secret_value().encode("utf-8"),
+            presented_token.encode("utf-8"),
         ):
             raise AuthenticationError("Administrator bootstrap is not authorized.")
         if self.repository.count_users() != 0:
             raise AuthConflictError(
                 "Administrator bootstrap has already been completed."
             )
+        raw_key = self.generate_api_key()
         try:
-            user = self.repository.create_user(
-                UserCreate(
-                    email=payload.email,
-                    display_name=payload.display_name,
-                    role="admin",
-                )
-            )
-            credential = self._issue_api_key(
-                user,
-                ApiKeyCreate(label="bootstrap-admin"),
+            user, api_key = self.repository.create_bootstrap_admin(
+                payload,
+                key_prefix=raw_key[:12],
+                key_hash=self.hash_api_key(raw_key, self.settings.api_key_pepper),
             )
         except IntegrityError as error:
             raise AuthConflictError(
                 "Administrator bootstrap conflicts with existing identity data."
             ) from error
-        return user, credential
+        return user, IssuedCredential(api_key=api_key, raw_key=raw_key)
 
     def create_user(self, payload: UserCreate) -> UserAccount:
         if self.repository.get_user_by_email(payload.email) is not None:

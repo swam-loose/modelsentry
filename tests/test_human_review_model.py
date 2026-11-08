@@ -26,6 +26,7 @@ def test_human_review_model_metadata() -> None:
         "rationale",
         "created_at",
         "decided_at",
+        "decided_by_user_id",
     }
 
 

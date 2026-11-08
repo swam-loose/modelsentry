@@ -8,6 +8,7 @@ def test_user_account_model_metadata() -> None:
         "email",
         "display_name",
         "role",
+        "bootstrap_slot",
         "is_active",
         "created_at",
         "updated_at",

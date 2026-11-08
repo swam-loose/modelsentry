@@ -26,7 +26,9 @@ def test_environment_overrides_dotenv(
         encoding="utf-8",
     )
     monkeypatch.setenv("MODELSENTRY_ENVIRONMENT", "production")
-    monkeypatch.setenv("MODELSENTRY_API_KEY_PEPPER", "production-secret-pepper")
+    monkeypatch.setenv(
+        "MODELSENTRY_API_KEY_PEPPER", "production-test-pepper-" + "x" * 32
+    )
 
     settings = Settings()
 
@@ -41,6 +43,44 @@ def test_production_rejects_development_api_key_pepper(
 
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+@pytest.mark.parametrize("secret_name", ["api_key_pepper", "bootstrap_token"])
+@pytest.mark.parametrize("value", ["", "   "])
+def test_settings_reject_empty_secrets(secret_name: str, value: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **{secret_name: value})
+
+
+@pytest.mark.parametrize(
+    "secret_name,value",
+    [
+        ("api_key_pepper", "short"),
+        ("api_key_pepper", "replace-with-a-long-random-secret"),
+        ("bootstrap_token", "short"),
+        ("bootstrap_token", "replace-with-a-separate-one-time-secret"),
+    ],
+)
+def test_production_rejects_weak_or_placeholder_secrets(
+    secret_name: str, value: str
+) -> None:
+    settings = {
+        "environment": "production",
+        "api_key_pepper": "production-test-pepper-" + "x" * 32,
+        secret_name: value,
+    }
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None, **settings)
+
+
+def test_production_requires_separate_bootstrap_and_hashing_secrets() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            _env_file=None,
+            environment="production",
+            api_key_pepper="same-test-secret-" + "x" * 32,
+            bootstrap_token="same-test-secret-" + "x" * 32,
+        )
 
 
 def test_invalid_environment(monkeypatch: pytest.MonkeyPatch) -> None:

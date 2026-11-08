@@ -1,11 +1,16 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from threading import Barrier
 from uuid import uuid4
 
 import pytest
 from pydantic import SecretStr
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.models.auth import ApiKey
+from app.repositories.auth import AuthRepository
 from app.schemas.auth import ApiKeyCreate, BootstrapAdminCreate, UserCreate
 from app.services.auth import (
     AuthConflictError,
@@ -41,12 +46,91 @@ def test_bootstrap_returns_one_time_key_and_persists_only_digest(
     user, credential = bootstrap(service)
 
     assert user.role == "admin"
+    assert user.bootstrap_slot == 1
     assert credential.raw_key.startswith("msk_")
     assert credential.api_key.key_hash != credential.raw_key
     assert credential.api_key.key_hash == service.hash_api_key(
         credential.raw_key,
         service.settings.api_key_pepper,
     )
+    assert credential.raw_key not in repr(credential)
+
+
+def test_bootstrap_rolls_back_user_when_key_persistence_fails(
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = AuthService(db_session, make_settings())
+    with monkeypatch.context() as patch:
+        patch.setattr(service, "hash_api_key", lambda *_: None)
+        with pytest.raises(AuthConflictError):
+            bootstrap(service)
+
+    assert service.repository.count_users() == 0
+    assert db_session.scalar(select(func.count(ApiKey.id))) == 0
+    user, credential = bootstrap(service)
+    assert user.is_active is True
+    assert service.authenticate(credential.raw_key).user_id == user.id
+
+
+def test_concurrent_bootstrap_has_only_one_winner(
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    engine = db_session.get_bind()
+    barrier = Barrier(2)
+    original_count = AuthRepository.count_users
+
+    def synchronized_count(repository: AuthRepository) -> int:
+        count = original_count(repository)
+        barrier.wait(timeout=10)
+        return count
+
+    def attempt(index: int) -> str:
+        with Session(engine) as session:
+            service = AuthService(session, make_settings())
+            try:
+                service.bootstrap_admin(
+                    BootstrapAdminCreate(
+                        email=f"admin-{index}@example.com", display_name="Administrator"
+                    ),
+                    "unit-test-bootstrap-token",
+                )
+            except AuthConflictError:
+                return "conflict"
+            return "created"
+
+    with monkeypatch.context() as patch:
+        patch.setattr(AuthRepository, "count_users", synchronized_count)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            outcomes = list(executor.map(attempt, (1, 2)))
+
+    assert sorted(outcomes) == ["conflict", "created"]
+    assert original_count(service_repository := AuthRepository(db_session)) == 1
+    assert service_repository.session.scalar(select(func.count(ApiKey.id))) == 1
+
+
+def test_inactive_user_cannot_receive_new_keys(db_session: Session) -> None:
+    service = AuthService(db_session, make_settings())
+    user = service.create_user(
+        UserCreate(email="inactive@example.com", display_name="Inactive", role="viewer")
+    )
+    user.is_active = False
+    db_session.commit()
+
+    with pytest.raises(AuthConflictError, match="inactive user"):
+        service.issue_api_key(user.id, ApiKeyCreate(label="Denied"))
+
+
+def test_bootstrap_token_rejects_unicode_without_server_error(
+    db_session: Session,
+) -> None:
+    service = AuthService(db_session, make_settings())
+    with pytest.raises(AuthenticationError):
+        service.bootstrap_admin(
+            BootstrapAdminCreate(email="admin@example.com", display_name="Admin"),
+            "not-the-token-\N{SNOWMAN}",
+        )
 
 
 def test_bootstrap_rejects_wrong_token_and_reuse(db_session: Session) -> None:
