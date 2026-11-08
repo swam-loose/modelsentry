@@ -1,0 +1,16 @@
+include README.md
+include LICENSE
+include SECURITY.md
+include CHANGELOG.md
+include alembic.ini
+include .env.example
+recursive-include .github *.yml *.yaml
+recursive-include app *.py
+recursive-include migrations *.py *.mako README
+recursive-include scripts *.py
+recursive-include docs *.md
+recursive-include tests *.py
+global-exclude *.py[cod] *.db *.sqlite *.sqlite3 .env
+prune .venv
+prune .pytest_cache
+prune .ruff_cache
