@@ -134,6 +134,15 @@ def verify_artifacts(directory: Path) -> None:
         )
         if metadata.get_all("Version") != [version]:
             raise ReleaseCheckError("Wheel metadata has an unexpected version.")
+        if metadata.get_all("License-Expression") != ["MIT"]:
+            raise ReleaseCheckError("Wheel metadata must declare the MIT license.")
+        if metadata.get_all("License-File") != ["LICENSE"]:
+            raise ReleaseCheckError("Wheel metadata must reference LICENSE.")
+        license_path = f"modelsentry-{version}.dist-info/licenses/LICENSE"
+        if license_path not in names:
+            raise ReleaseCheckError("The wheel is missing its license file.")
+        if archive.read(license_path) != (PROJECT_ROOT / "LICENSE").read_bytes():
+            raise ReleaseCheckError("The wheel license differs from LICENSE.")
     with tarfile.open(source_distribution, "r:gz") as archive:
         members = archive.getmembers()
         names = [member.name for member in members]
@@ -144,6 +153,7 @@ def verify_artifacts(directory: Path) -> None:
         required = {
             "alembic.ini",
             "README.md",
+            "LICENSE",
             "SECURITY.md",
             "MANIFEST.in",
             "pyproject.toml",
@@ -155,6 +165,12 @@ def verify_artifacts(directory: Path) -> None:
         }
         if not {prefix + path for path in required}.issubset(names):
             raise ReleaseCheckError("The source distribution is missing release files.")
+        license_file = archive.extractfile(prefix + "LICENSE")
+        if license_file is None:
+            raise ReleaseCheckError("The source distribution license is not a file.")
+        with license_file:
+            if license_file.read() != (PROJECT_ROOT / "LICENSE").read_bytes():
+                raise ReleaseCheckError("The source distribution license differs.")
     print("ARTIFACTS_PASSED")
 
 

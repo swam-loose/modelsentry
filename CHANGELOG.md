@@ -10,6 +10,8 @@
 - Local API-key authentication, role-based permissions, expiry, and revocation.
 - Windows/Linux CI, a coverage threshold, full migration checks, and package
   build, inspection, and installed-wheel smoke checks.
+- Maintainer-approved MIT license, SPDX package metadata, and license inclusion
+  checks for source and wheel distributions.
 
 ### Security hardening
 
@@ -24,4 +26,4 @@
 - Local, single-organization operation; no automatic model deployment.
 - Mock provider only; no paid provider, external SSO, distributed queue, or UI.
 - Remote operations need additional transport and operational safeguards.
-- A public release and license choice still require maintainer confirmation.
+- A public release still requires maintainer confirmation.

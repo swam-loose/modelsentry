@@ -225,8 +225,13 @@ Workflow actions are pinned to immutable SHAs, repository permissions are
 read-only, and candidate artifacts contain no runtime database or real `.env`.
 Nothing is published, tagged, or deployed automatically. Follow the
 [release checklist](docs/RELEASE_CHECKLIST.md) before approving version 0.1.0.
-The checklist includes an explicit software-license decision; no license is
-chosen on the maintainer's behalf.
+
+## License
+
+ModelSentry is licensed under the [MIT License](LICENSE).
+Copyright (c) 2026 Wilian Ataide.
+The license text is included in both the source distribution and the wheel.
+Adopting a license does not publish a release or deploy the application.
 
 ## Version 0.1 roadmap
 
