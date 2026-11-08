@@ -187,7 +187,7 @@ def test_reviewer_can_decide_reviews_but_cannot_operate_resources(
         "/api/v1/reviews",
         json={"run_id": run["id"], "reviewer": "reviewer@example.com"},
     ).json()
-    _, raw_key, _ = create_user_and_key(
+    user, raw_key, _ = create_user_and_key(
         client,
         email="reviewer@example.com",
         role="reviewer",
@@ -212,7 +212,47 @@ def test_reviewer_can_decide_reviews_but_cannot_operate_resources(
 
     assert decision.status_code == 200
     assert decision.json()["status"] == "approved"
+    assert decision.json()["decided_by_user_id"] == user["id"]
     assert denied_operation.status_code == 403
+
+
+def test_reviewer_cannot_decide_another_users_assignment(client: TestClient) -> None:
+    run = create_completed_run(client)
+    review = client.post(
+        "/api/v1/reviews",
+        json={"run_id": run["id"], "reviewer": "assigned@example.com"},
+    ).json()
+    _, raw_key, _ = create_user_and_key(
+        client, email="other-reviewer@example.com", role="reviewer"
+    )
+
+    response = client.patch(
+        f"/api/v1/reviews/{review['id']}",
+        headers=bearer(raw_key),
+        json={"decision": "approved"},
+    )
+
+    assert response.status_code == 403
+    unchanged = client.get(f"/api/v1/reviews/{review['id']}").json()
+    assert unchanged["status"] == "pending"
+    assert unchanged["decided_by_user_id"] is None
+
+
+def test_admin_override_retains_actual_actor_identity(client: TestClient) -> None:
+    run = create_completed_run(client)
+    admin_id = client.get("/api/v1/auth/me").json()["user"]["id"]
+    review = client.post(
+        "/api/v1/reviews",
+        json={"run_id": run["id"], "reviewer": "assigned@example.com"},
+    ).json()
+
+    response = client.patch(
+        f"/api/v1/reviews/{review['id']}", json={"decision": "approved"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["reviewer"] == "assigned@example.com"
+    assert response.json()["decided_by_user_id"] == admin_id
 
 
 def test_api_key_expiration_and_missing_resources_are_reported(

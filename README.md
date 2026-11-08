@@ -1,5 +1,7 @@
 # ModelSentry
 
+[![CI](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml)
+
 **Evaluate every model. Govern every release.**
 
 ModelSentry is an open-source AI evaluation and governance platform focused on
@@ -39,8 +41,9 @@ python -m alembic upgrade head
 Create a local `.env` from `.env.example` and replace both documented secret
 placeholders. `MODELSENTRY_API_KEY_PEPPER` protects stored API-key digests and
 must remain stable for existing keys to work. `MODELSENTRY_BOOTSTRAP_TOKEN`
-authorizes only the first administrator bootstrap. Production startup rejects
-the documented development pepper.
+authorizes only the first administrator bootstrap. Production startup requires
+independent random secrets of at least 32 characters and rejects empty values
+and documented placeholders. Remove the bootstrap token after setup and restart.
 
 ## Run the API
 
@@ -71,7 +74,7 @@ list endpoints.
 | --- | --- |
 | `admin` | Identity administration and all product operations |
 | `operator` | Read access and product operations, excluding review decisions |
-| `reviewer` | Read access and final human-review decisions |
+| `reviewer` | Read access and final decisions on their own review assignments |
 | `viewer` | Read-only access |
 
 Use `GET /api/v1/auth/me` to inspect the authenticated user, credential ID,
@@ -152,10 +155,12 @@ marks the run as rejected, pending assignments block approval, and only runs
 whose requested reviews are all approved become approved. Automated evaluator
 results never create a human approval decision.
 
-Version 0.1 records reviewer identifiers supplied by the API caller. Identity
-authentication and role-based authorization remain explicit roadmap items, so
-the local workflow is auditable but must not yet be treated as proof of a
-reviewer's real-world identity.
+The API binds reviewer decisions to the authenticated account's normalized
+email. An administrator may override an assignment, but `decided_by_user_id`
+records the actual actor separately from the assigned reviewer. Legacy reviews
+keep a null actor ID because the application cannot reconstruct old identities.
+These are administrator-managed local accounts, not proof of legal identity or
+email ownership. See [SECURITY.md](SECURITY.md) for deployment limits.
 
 ## A/B run comparisons and cost evidence
 
@@ -202,10 +207,26 @@ model automatically.
 ## Quality checks
 
 ```powershell
-python -m ruff check app tests migrations
-python -m ruff format --check app tests migrations
-python -m pytest --cov=app --cov-report=term-missing
+python -m ruff check app tests migrations scripts
+python -m ruff format --check app tests migrations scripts
+python -m pytest -p no:cacheprovider --cov=app --cov-report=term-missing
+python scripts/check_release.py migrations
 ```
+
+## CI and release candidates
+
+The `CI` workflow runs on pull requests to `develop` and `main`, pushes to
+those branches, and manual dispatch. Python 3.12 tests run on Windows and
+Linux with a minimum application coverage of 95%. It also checks migrations,
+builds a wheel and source distribution, validates their metadata and contents,
+and smoke-tests the installed wheel outside the checkout.
+
+Workflow actions are pinned to immutable SHAs, repository permissions are
+read-only, and candidate artifacts contain no runtime database or real `.env`.
+Nothing is published, tagged, or deployed automatically. Follow the
+[release checklist](docs/RELEASE_CHECKLIST.md) before approving version 0.1.0.
+The checklist includes an explicit software-license decision; no license is
+chosen on the maintainer's behalf.
 
 ## Version 0.1 roadmap
 
@@ -216,5 +237,7 @@ python -m pytest --cov=app --cov-report=term-missing
 5. Authentication and role-based access control — complete
 
 Version 0.1 now provides an end-to-end local evaluation and governance path.
-Future milestones can add an Ollama adapter, asynchronous execution, CI release
-checks, organization isolation, and external identity-provider integration.
+Future milestones can add an Ollama adapter, asynchronous execution,
+organization isolation, and external identity-provider integration. Version
+0.1.0 remains a release candidate until the checklist is approved and the
+exact release commit passes CI.

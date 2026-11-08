@@ -19,10 +19,13 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "build>=1.2,<2.0",
     "httpx2>=2.15,<3.0",
     "pytest>=9.1,<10.0",
     "pytest-cov>=7.1,<8.0",
+    "pyyaml>=6.0,<7.0",
     "ruff>=0.16,<1.0",
+    "twine>=6.0,<7.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -37,6 +40,8 @@ branch = true
 source = ["app"]
 
 [tool.coverage.report]
+fail_under = 95
+precision = 2
 show_missing = true
 skip_covered = true
 

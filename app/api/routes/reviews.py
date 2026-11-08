@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.auth.security import CurrentPrincipal, get_current_principal
 from app.db.session import get_db_session
 from app.schemas.human_review import (
     HumanReviewCreate,
@@ -13,6 +14,7 @@ from app.schemas.human_review import (
 )
 from app.services.human_review import (
     HumanReviewConflictError,
+    HumanReviewForbiddenError,
     HumanReviewNotFoundError,
     HumanReviewService,
 )
@@ -93,11 +95,18 @@ def decide_human_review(
     review_id: UUID,
     payload: HumanReviewDecision,
     session: DbSession,
+    principal: Annotated[CurrentPrincipal, Depends(get_current_principal)],
 ) -> HumanReviewRead:
     """Record one final human approval or rejection decision."""
 
     try:
-        review = HumanReviewService(session).decide_review(review_id, payload)
+        review = HumanReviewService(session).decide_review(
+            review_id,
+            payload,
+            actor_user_id=principal.user.id,
+            actor_email=principal.user.email,
+            actor_role=principal.user.role,
+        )
     except HumanReviewNotFoundError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -106,6 +115,11 @@ def decide_human_review(
     except HumanReviewConflictError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
+            detail=str(error),
+        ) from error
+    except HumanReviewForbiddenError as error:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
             detail=str(error),
         ) from error
     return HumanReviewRead.model_validate(review)

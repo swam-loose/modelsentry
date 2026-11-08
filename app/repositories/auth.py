@@ -2,11 +2,11 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.auth import ApiKey, UserAccount
-from app.schemas.auth import UserCreate
+from app.schemas.auth import BootstrapAdminCreate, UserCreate
 
 
 class AuthRepository:
@@ -24,6 +24,33 @@ class AuthRepository:
         self._commit()
         self.session.refresh(user)
         return user
+
+    def create_bootstrap_admin(
+        self,
+        payload: BootstrapAdminCreate,
+        *,
+        key_prefix: str,
+        key_hash: str,
+    ) -> tuple[UserAccount, ApiKey]:
+        """Atomically claim the unique bootstrap slot and create its credential."""
+
+        user = UserAccount(
+            email=payload.email,
+            display_name=payload.display_name,
+            role="admin",
+            bootstrap_slot=1,
+        )
+        api_key = ApiKey(
+            label="bootstrap-admin",
+            key_prefix=key_prefix,
+            key_hash=key_hash,
+        )
+        user.api_keys.append(api_key)
+        self.session.add(user)
+        self._commit()
+        self.session.refresh(user)
+        self.session.refresh(api_key)
+        return user, api_key
 
     def get_user(self, user_id: UUID) -> UserAccount | None:
         return self.session.get(UserAccount, user_id)
@@ -101,6 +128,6 @@ class AuthRepository:
     def _commit(self) -> None:
         try:
             self.session.commit()
-        except IntegrityError:
+        except SQLAlchemyError:
             self.session.rollback()
             raise

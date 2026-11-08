@@ -73,4 +73,10 @@ class HumanReview(Base):
         DateTime(timezone=True),
         nullable=True,
     )
+    decided_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("user_accounts.id", name="fk_human_reviews_decided_by_user"),
+        nullable=True,
+        index=True,
+    )
     run: Mapped[EvaluationRun] = relationship(back_populates="reviews")

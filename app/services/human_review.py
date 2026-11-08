@@ -20,6 +20,10 @@ class HumanReviewConflictError(Exception):
     """Raised when a review assignment or transition conflicts with history."""
 
 
+class HumanReviewForbiddenError(Exception):
+    """Raised when a reviewer tries to decide another identity's assignment."""
+
+
 class HumanReviewService:
     """Enforce supervised, immutable human approval decisions."""
 
@@ -80,10 +84,31 @@ class HumanReviewService:
         self,
         review_id: UUID,
         payload: HumanReviewDecision,
+        *,
+        actor_user_id: UUID | None = None,
+        actor_email: str | None = None,
+        actor_role: str | None = None,
     ) -> HumanReview:
         review = self.get_review(review_id)
+        if (
+            actor_role is not None
+            and actor_role != "admin"
+            and (
+                actor_role != "reviewer"
+                or actor_email is None
+                or actor_user_id is None
+                or review.reviewer != actor_email.strip().casefold()
+            )
+        ):
+            raise HumanReviewForbiddenError(
+                "Only the assigned reviewer or an administrator can decide this review."
+            )
         if review.status != "pending":
             raise HumanReviewConflictError(
                 "A completed human review decision is immutable."
             )
-        return self.repository.decide(review, payload)
+        return self.repository.decide(
+            review,
+            payload,
+            decided_by_user_id=actor_user_id,
+        )

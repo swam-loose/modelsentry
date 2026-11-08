@@ -8,7 +8,9 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Integer,
     String,
+    UniqueConstraint,
     Uuid,
     func,
     text,
@@ -27,6 +29,11 @@ class UserAccount(Base):
             "role IN ('admin', 'operator', 'reviewer', 'viewer')",
             name="ck_user_accounts_role",
         ),
+        CheckConstraint(
+            "bootstrap_slot IS NULL OR (bootstrap_slot = 1 AND role = 'admin')",
+            name="ck_user_accounts_bootstrap_slot",
+        ),
+        UniqueConstraint("bootstrap_slot", name="uq_user_accounts_bootstrap_slot"),
     )
 
     id: Mapped[UUID] = mapped_column(
@@ -42,6 +49,7 @@ class UserAccount(Base):
     )
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False)
+    bootstrap_slot: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,

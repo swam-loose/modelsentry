@@ -71,10 +71,13 @@ class HumanReviewRepository:
         self,
         review: HumanReview,
         payload: HumanReviewDecision,
+        *,
+        decided_by_user_id: UUID | None = None,
     ) -> HumanReview:
         review.status = payload.decision
         review.rationale = payload.rationale
         review.decided_at = datetime.now(UTC)
+        review.decided_by_user_id = decided_by_user_id
         self.session.commit()
         self.session.refresh(review)
         return review
