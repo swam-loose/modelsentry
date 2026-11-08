@@ -45,8 +45,10 @@ still requires the source checkout or unpacked source distribution.
 
 ## Maintainer approval before publication
 
-- [ ] Choose and review an explicit software license. This package does not
-  choose one or assert a legal license grant on the maintainer's behalf.
+- [x] Maintainer approved the MIT license with copyright attribution to
+  Wilian Ataide. The canonical text is in `LICENSE`.
+- [ ] Confirm the final source distribution and wheel contain the approved
+  license and that wheel metadata declares `License-Expression: MIT`.
 - [ ] Complete a local demo with synthetic data and independent random secrets.
 - [ ] Confirm no production credentials or user data appear in artifacts.
 - [ ] Merge approved changes into `main` and wait for its own CI run to pass.
