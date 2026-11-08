@@ -1,6 +1,6 @@
 # ModelSentry
 
-[![CI](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml)
+[![CI](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/swam-loose/modelsentry/actions/workflows/ci.yml)
 
 **Evaluate every model. Govern every release.**
 
@@ -222,7 +222,7 @@ python -m pytest -p no:cacheprovider --cov=app --cov-report=term-missing
 python scripts/check_release.py migrations
 ```
 
-## CI and release candidates
+## CI and releases
 
 The `CI` workflow runs on pull requests to `develop` and `main`, pushes to
 those branches, and manual dispatch. Python 3.12 tests run on Windows and
@@ -233,7 +233,7 @@ and smoke-tests the installed wheel outside the checkout.
 Workflow actions are pinned to immutable SHAs, repository permissions are
 read-only, and candidate artifacts contain no runtime database or real `.env`.
 Nothing is published, tagged, or deployed automatically. Follow the
-[release checklist](docs/RELEASE_CHECKLIST.md) before approving version 0.1.0.
+[release checklist](docs/RELEASE_CHECKLIST.md) before publishing a release.
 
 ## License
 
@@ -252,6 +252,7 @@ Adopting a license does not publish a release or deploy the application.
 
 Version 0.1 now provides an end-to-end local evaluation and governance path.
 Future milestones can add an Ollama adapter, asynchronous execution,
-organization isolation, and external identity-provider integration. Version
-0.1.0 remains a release candidate until the checklist is approved and the
-exact release commit passes CI.
+organization isolation, and external identity-provider integration. See the
+[0.1.0 release notes](docs/RELEASE_NOTES_0.1.0.md) for this version's scope and
+limitations. A release requires maintainer authorization and a successful CI
+run for its exact tagged commit; CI never publishes or deploys automatically.

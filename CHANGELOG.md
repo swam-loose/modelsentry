@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased — 0.1.0 candidate
+## Unreleased
+
+No changes recorded yet.
+
+## [0.1.0] - 2026-11-08
 
 ### Added
 
@@ -28,4 +32,5 @@
 - Local, single-organization operation; no automatic model deployment.
 - Mock provider only; no paid provider, external SSO, distributed queue, or UI.
 - Remote operations need additional transport and operational safeguards.
-- A public release still requires maintainer confirmation.
+- Release publication is a manual maintainer-authorized operation; there is no
+  automatic PyPI upload or deployment.
