@@ -50,6 +50,9 @@ still requires the source checkout or unpacked source distribution.
 - [ ] Confirm the final source distribution and wheel contain the approved
   license and that wheel metadata declares `License-Expression: MIT`.
 - [ ] Complete a local demo with synthetic data and independent random secrets.
+  Follow [the synthetic demo guide](SYNTHETIC_DEMO.md), confirm the expected
+  blocked/passed decisions, and review `SYNTHETIC_DEMO_PASSED`. Its reviewer
+  action is simulated and is not a real release authorization.
 - [ ] Confirm no production credentials or user data appear in artifacts.
 - [ ] Merge approved changes into `main` and wait for its own CI run to pass.
 - [ ] Confirm the version and final release notes against the exact commit.

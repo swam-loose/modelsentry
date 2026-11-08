@@ -12,6 +12,8 @@
   build, inspection, and installed-wheel smoke checks.
 - Maintainer-approved MIT license, SPDX package metadata, and license inclusion
   checks for source and wheel distributions.
+- An isolated synthetic API demo covering prompt regressions, role permissions,
+  reviewer ownership, pending approval, and immutable gate evidence.
 
 ### Security hardening
 
